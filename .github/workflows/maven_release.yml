@@ -1,0 +1,38 @@
+name: Maven Release
+on:
+  release:
+    types: [released]
+
+jobs:
+  Build:
+    uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_build_template.yml@v2.3.0
+    with:
+      version: ${{ github.ref_name }}
+      sonar-skip: false
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  DeployReleaseVersion:
+    needs: [ Build ]
+    uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_deploy_template.yml@v2.3.0
+    with:
+      version: ${{ github.ref_name }}
+      maven-opts: '-PcentralRelease'
+      deploy-server-id: central
+      sbom: true
+      sign: true
+      environment: 'Release'
+    secrets:
+      GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+      GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+      DEPLOY_SERVER_USER_NAME: ${{ secrets.MAVEN_CENTRAL_USER_NAME }}
+      DEPLOY_SERVER_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+
+  DependencyMonitor:
+    needs: [ DeployReleaseVersion ]
+    uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_dependency_scan_template.yml@v2.3.0
+    with:
+      snyk-reference: ${{ github.ref_name }}
+      snyk-organization: ${{ vars.SNYK_ORG_ID }}
+    secrets:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
