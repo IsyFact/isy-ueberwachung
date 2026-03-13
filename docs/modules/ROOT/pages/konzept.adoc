@@ -1,6 +1,7 @@
-= Konzept Überwachung: Inhalt
+= Konzept Überwachung
 
-// tag::inhalt[]
+include::partial$library.adoc[]
+
 [[einleitung]]
 == Einleitung
 
@@ -183,5 +184,3 @@ Folgende Punkte sind bewusst nicht Teil dieses Konzeptes:
 
 * Micrometer unterstützt die Anbindung zahlreicher Monitoring-Systeme.
 Es werden keine Vorgaben zur Verwendung eines bestimmten Systems gemacht.
-
-// end::inhalt[]

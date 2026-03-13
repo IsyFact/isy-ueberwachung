@@ -1,7 +1,21 @@
-= Nutzungsvorgaben Überwachung: Inhalt
+= Nutzungsvorgaben Überwachung
 
-// tag::inhalt[]
-// :sourcedir: ../../../../../../../../isy-ueberwachung/src/
+include::partial$library.adoc[]
+
+[[einleitung]]
+== Einleitung
+
+Dieses Dokument enthält die Nutzungsvorgaben zur Überwachung von Anwendungen gemäß den xref:glossary:glossary:master.adoc#glossar-ifs[IsyFact Standards].
+
+[[aufbau-und-zweck-des-dokuments]]
+== Aufbau und Zweck des Dokuments
+
+In diesem Dokument werden konkrete Nutzungs- und Implementierungsvorgaben beschrieben.
+
+Die Realisierung einer einheitlichen Überwachungsschnittstelle erlaubt es dem Betrieb frühzeitig Probleme in der xref:glossary:glossary:master.adoc#glossar-anwendungslandschaft[Anwendungslandschaft] zu erkennen und darauf zu reagieren.
+Dadurch können Ausfallzeiten minimiert werden.
+
+Alle Vorgaben orientieren sich an den in den jeweiligen Kapiteln aufgeführten Anforderungen und gelten für alle Anwendungen nach IsyFact-Architektur.
 
 [[ueberwachung-von-anwendungen]]
 == Überwachung von Anwendungen
@@ -29,9 +43,9 @@ Für die Überwachbarkeit der Anwendungen werden die folgenden Festlegungen getr
 * Für die Überwachung wird Spring Boot Actuator eingesetzt.
 * Die Endpoints von Actuator werden über HTTP bereitgestellt.
 * Es werden nur die unbedingt benötigten Endpoints freigeschaltet.
-  Alle nicht benötigten Endpoints sind zu deaktivieren.
+Alle nicht benötigten Endpoints sind zu deaktivieren.
 * Endpoints werden nur passiv benutzt.
-  Die Anwendung wird nicht darüber konfiguriert.
+Die Anwendung wird nicht darüber konfiguriert.
 * Der Zugriff auf Endpoints wird mit Benutzername und Passwort abgesichert.
 * Anwendungen stellen einen definierten Satz von Überwachungsinformationen bereit.
 
@@ -55,10 +69,10 @@ Actuator stellt über den `metrics` Endpoint allgemeine Überwachungsinformation
 Die folgenden Metriken müssen durch Spring Boot automatisch registriert und bereitgestellt werden:
 
 * JVM Metriken
-  ** Speicher und Puffer
-  ** Statistiken zur Garbage Collection
-  ** Nutzung von Threads
-  ** Anzahl der geladenen Klassen
+** Speicher und Puffer
+** Statistiken zur Garbage Collection
+** Nutzung von Threads
+** Anzahl der geladenen Klassen
 * Metriken zur Prozessorauslastung
 * Metriken für Dateideskriptoren
 * Metriken zur Uptime der Anwendung
@@ -328,8 +342,8 @@ isy.task.tasks.isyHealthTask.fixed-delay=30s
 
 Standardmäßig wird der Zugriff auf Endpoints durch OAuth2 Authentifizierung abgesichert, wenn die Dependencies:
 
- * `org.springframework.security:spring-security-config` und
- * `org.springframework.security:spring-security-web`
+* `org.springframework.security:spring-security-config` und
+* `org.springframework.security:spring-security-web`
 
 im Klassenpfad verfügbar sind. D.h. hier muss ein Token mitgeschicket werden. das auf Gütligkeit geprüft wird.
 
@@ -610,5 +624,3 @@ Durch die oben beschriebene Konfiguration kann die gewünschte Verfügbarkeit de
 Zur Steuerung des Loadbalancing-Servlets muss die IsAlive-Datei im Konfigurationsverzeichnis der Anwendung durch den Betrieb angelegt bzw. entfernt werden.
 Der Standardname für die IsAlive-Datei ist `/etc/<anwendungsname>/isAlive`.
 Dieses kann der Betrieb bei Bedarf über ein Shell-Skript automatisieren.
-
-// end::inhalt[]
