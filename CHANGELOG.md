@@ -24,3 +24,14 @@ Die übrigen Metriken ohne Zeitbeschränkung funktionieren weiterhin wie gehabt.
 
 > **Hinweis:** Mithilfe der z.B. in Prometheus verfügbaren Funktionen lässt sich die gewohnte Funktionalität nahezu vollständig nachbilden.
 
+### Dependency Änderungen
+
+```xml
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-webmvc-test</artifactId>
+<scope>test</scope>
+
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-webtestclient</artifactId>
+<scope>test</scope>
+```
