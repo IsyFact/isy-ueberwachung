@@ -6,7 +6,7 @@ on:
     branches:
       - main
       - develop
-      - support/**
+      - support-*
       - hotfix/**
       - feature/**
       - bugfix/**
@@ -21,7 +21,7 @@ jobs:
     uses: IsyFact/isy-github-actions-templates/.github/workflows/next_version.yml@v2.3.0
     with:
       next-version: 5.0.0
-      calculate-rc: ${{ startsWith(github.ref, 'refs/heads/support/') }}
+      calculate-rc: ${{ startsWith(github.ref, 'refs/heads/support-') }}
 
   Maven:
     needs: [ Version ]
@@ -33,14 +33,14 @@ jobs:
 
   DeploySnapshotToCentral:
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
-      (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/support/'))
+      (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/support-'))
     needs: [ Version, Maven ]
     uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_deploy_template.yml@v2.3.0
     with:
       version: ${{ needs.Version.outputs.next-version }}
       maven-opts: '-PcentralSnapshot'
       deploy-server-id: central
-      sbom: ${{ startsWith(github.ref, 'refs/heads/support/') }}
+      sbom: ${{ startsWith(github.ref, 'refs/heads/support-') }}
       sign: true
       environment: 'Release'
     secrets:
