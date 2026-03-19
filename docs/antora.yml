@@ -1,5 +1,5 @@
 name: ueberwachung
-title: Baustein Ueberwachung
+title: Baustein Überwachung
 prerelease: '(DEV)'
 start_page: ROOT:konzept.adoc
 nav:
