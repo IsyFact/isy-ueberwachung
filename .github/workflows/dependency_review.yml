@@ -1,0 +1,13 @@
+name: Dependency Review
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  DependencyReview:
+    uses: IsyFact/isy-github-actions-templates/.github/workflows/dependency_review_template.yml@v2.3.0
+    with:
+      allow-dependencies-licenses:
+        'pkg:maven/org.jacoco/jacoco-maven-plugin'
