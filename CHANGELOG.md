@@ -1,6 +1,7 @@
 # 5.0.0
 
 ### FEATURES
+- `IFS-5234`: Hinzugefügt: Konzeptionelles Readiness- und Liveness-Modell für IF.5
 - `IFS-4818`: Autokonfiguration von Load Balancer separiert
 - `IFS-4748`: Dokumentation von aktualisierten Properties
 
@@ -35,3 +36,12 @@ Die übrigen Metriken ohne Zeitbeschränkung funktionieren weiterhin wie gehabt.
 <artifactId>spring-boot-webtestclient</artifactId>
 <scope>test</scope>
 ```
+## RELEASE NOTES
+
+##### Modernisierung der Anwendungsüberwachung (Readiness & Liveness)
+Mit der Aktualisierung des IsyFact 5 (IF.5) Konzepts führen wir einen Cloud-nativen Monitoring-Standard ein, der die bisherige Vermischung von Betriebszuständen auflöst.
+Die Neuerungen im Überblick:
+* Präzise Traffic-Steuerung (Readiness): Loadbalancer erkennen über /actuator/health/readiness exakt, wann eine Instanz fachlich bereit ist (z. B. nach Cache-Initialisierung).
+* Erhöhte Robustheit (Liveness): Der neue /actuator/health/liveness Endpunkt liefert Infrastrukturen (wie Kubernetes) ein sauberes Signal für Prozess-Neustarts, ohne durch temporäre Nachbarsystem-Störungen Fehlalarme auszulösen.
+* Klare Abhängigkeiten: Neue Architekturvorgaben definieren präzise, welche Nachbarsysteme (Datenbanken, APIs) als essenziell für die Betriebsbereitschaft gelten.
+* Risikofreie Migration: Durch Parallelbetrieb bleibt der bestehende /actuator/health Endpunkt funktional identisch. Bestehende Monitorings laufen ohne Anpassungszwang weiter (kein Breaking Change).
