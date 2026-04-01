@@ -7,7 +7,7 @@ include::partial$library.adoc[]
 [[einleitung]]
 == Einleitung
 
-In diesem Konzept werden die Designvorgaben für die Überwachung von Anwendungen gemäß der xref:referenzarchitektur:index.adoc[] vorgestellt.
+In diesem Konzept werden die Designvorgaben für die Überwachung von Anwendungen gemäß der xref:isyfact-standards-doku:referenzarchitektur:index.adoc[] vorgestellt.
 Es legt ein standardkonformes Modell zur Überwachung von Anwendungen auf Basis von Spring Boot Actuator fest.
 
 Die Realisierung einer einheitlichen Überwachungsschnittstelle erlaubt dem Betrieb frühzeitig Probleme in der xref:glossary:glossary:master.adoc#glossar-anwendungslandschaft[Anwendungslandschaft] zu erkennen und darauf zu reagieren.
@@ -18,7 +18,7 @@ Dabei wird _Readiness_ als fachlich und betrieblich führendes Signal für die A
 _Liveness_ bildet ausschließlich die Prozess- und Runtime-Lebendigkeit einer Anwendung ab.
 Der bestehende Endpoint `/actuator/health` bleibt im Sinne der Abwärtskompatibilität semantisch und funktional unverändert und ist parallel zu den Endpunkten `/actuator/health/readiness` und `/actuator/health/liveness` bereitzustellen.
 In Systementwürfen können Verfeinerungen der hier getroffenen Vorgaben gemacht werden.
-Weiterhin können die hier gemachten Vorgaben als Basis für die Beschreibung der Überwachungsschnittstelle im xref:methodik:vorlagen.adoc#dokumentation-anwendung[Systemhandbuch] verwendet werden.
+Weiterhin können die hier gemachten Vorgaben als Basis für die Beschreibung der Überwachungsschnittstelle im xref:isyfact-standards-doku:methodik:vorlagen.adoc#dokumentation-anwendung[Systemhandbuch] verwendet werden.
 
 [[kurzeinfuehrung-in-spring-boot-actuator]]
 == Kurzeinführung in Spring Boot Actuator
@@ -184,7 +184,7 @@ Ein Health-Check mit negativem Ergebnis eines essenziellen Nachbarsystems muss i
 
 Die Nachbarsystemchecks können individuell konfiguriert werden.
 So kann z. B. konfiguriert werden, ob ein Nachbarsystem essenziell ist oder nicht.
-Details hierzu finden sich in den xref:nutzungsvorgaben/master.adoc#vorgaben-fuer-die-pruefung-der-verfuegbarkeit[Nutzungsvorgaben].
+Details hierzu finden sich in den xref:nutzungsvorgaben.adoc#vorgaben-fuer-die-pruefung-der-verfuegbarkeit[Nutzungsvorgaben].
 
 [[nachbarsystemcheck-allgemein]]
 ==== Nachbarsystemchecks (allgemein)
@@ -242,7 +242,7 @@ Alle anderen Anwendungen auf dem entsprechenden Server müssen weiterhin bedient
 Sind _Liveness_ und _Readiness_ definiert, soll der Loadbalancer die _Readiness_ eines Knotens prüfen.
 Ist die _Readiness_ nicht gegeben, ist der Knoten aus dem Loadbalancing heraus zu nehmen.
 Je nach betrieblichen Bedingungen und den technischen Möglichkeiten des eingesetzten Loadbalancers ist die Abfrage der _Readiness_ über den _Readiness_ Endpoint oder alternativ über eine `isAlive`-Datei festzustellen.
-Die betrieblich begründete, temporäre Nichtverfügbarkeit einer Anwendung, kann über die Löschung einer `isAlive`-Datei gesteuert werden (vgl. xref:nutzungsvorgaben/master.adoc#integration-des-loadbalancer-servlets[Nutzungsvorgaben]).
+Die betrieblich begründete, temporäre Nichtverfügbarkeit einer Anwendung, kann über die Löschung einer `isAlive`-Datei gesteuert werden (vgl. xref:nutzungsvorgaben.adoc#integration-des-loadbalancer-servlets[Nutzungsvorgaben]).
 Ist das Vorhandensein einer `isAlive`-Datei aus betrieblichen Anforderungen nicht notwendig ist die direkte Prüfung über den _Readiness_ Endpoint vorzunehmen.
 
 [[migrations-und-parallelbetrieb]]
@@ -269,7 +269,7 @@ Die Migration erfolgt bewusst ohne Umdeutung des bestehenden Endpunkts `/actuato
 [[festlegungen-und-ausgrenzungen]]
 == Festlegungen und Ausgrenzungen
 
-Die Nutzungsvorgaben finden sich in den xref:nutzungsvorgaben/master.adoc[].
+Die Nutzungsvorgaben finden sich in den xref:nutzungsvorgaben.adoc[].
 
 Das Konzept für die Prüfung der Verfügbarkeit ist:
 

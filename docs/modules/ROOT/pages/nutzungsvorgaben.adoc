@@ -26,12 +26,12 @@ Actuator bringt eine Reihe von eingebauten Endpoints mit und bietet auch die Mö
 So werden für Informationen über den Systemzustand die eingebauten Endpunkte `health`, `liveness`,`readiness` angeboten.
 Über den Endpoint `metrics` können Metriken gelesen werden.
 Die bereitgestellten Metriken werden von Micrometer erfasst.
-Eine nähere Beschreibung des Konzeptes findet sich im Dokument xref:konzept/master.adoc#einleitung[Überwachung - Konzept].
+Eine nähere Beschreibung des Konzeptes findet sich im Dokument xref:konzept.adoc#einleitung[Überwachung - Konzept].
 
 Der Fokus liegt dabei auf der Schaffung von einheitlichen Administrationsschnittstellen, welche dem Betrieb eine einfache Überwachung der Anwendungen erlauben.
 Alle Vorgaben sind beim Entwurf und der Realisierung von neuen Anwendungen nach IsyFact-Architektur zu berücksichtigen.
 Gegebenenfalls können in Systementwürfen Verfeinerungen der hier getroffenen Vorgaben gemacht werden.
-Weiterhin können die hier gemachten Vorgaben als Basis für die Beschreibung der Überwachungsschnittstelle im xref:methodik:vorlagen.adoc#dokumentation-anwendung[Systemhandbuch] verwendet werden.
+Weiterhin können die hier gemachten Vorgaben als Basis für die Beschreibung der Überwachungsschnittstelle im xref:isyfact-standards-doku:methodik:vorlagen.adoc#dokumentation-anwendung[Systemhandbuch] verwendet werden.
 
 [[designvorgaben-fuer-die-ueberwachungsschnittstelle]]
 === Designvorgaben für die Überwachungsschnittstelle
@@ -237,11 +237,11 @@ gesetzt.
 ===== Performance
 
 Die im Konzept beschriebenen Überwachungsfunktionen dürfen keinen relevanten negativen Einfluss auf die Performance der Anwendung haben.
-Dazu sind neben der Einhaltung der in dem Dokument xref:konzept/master.adoc#einleitung[Überwachung - Konzept] beschriebenen Vorgaben noch einige grundlegende  Regeln zu beachten:
+Dazu sind neben der Einhaltung der in dem Dokument xref:konzept.adoc#einleitung[Überwachung - Konzept] beschriebenen Vorgaben noch einige grundlegende  Regeln zu beachten:
 
 * Da nicht auszuschließen ist, dass ein Überwachungswerkzeug sehr häufig Informationen aus den Endpoints abruft, darf das Bereitstellen der Informationen keine zeitaufwändigen Aktionen im aufgerufenen Backend veranlassen.
 * Bei der Bereitstellung weiterer Überwachungsinformationen ist darauf zu achten, dass die Ermittlung der Kennzahlen keinen relevanten negativen Einfluss auf die Performance der Anwendung hat.
-Insbesondere dürfen keine fachlichen Funktionen des xref:referenzarchitektur:software-technisch/backend/anwendungskern.adoc[Anwendungskerns] aufgerufen werden.
+Insbesondere dürfen keine fachlichen Funktionen des xref:isyfact-standards-doku:referenzarchitektur:software-technisch/backend/anwendungskern.adoc[Anwendungskerns] aufgerufen werden.
 
 [[statische-informationen-ueber-die-anwendung]]
 ==== Statische Informationen über die Anwendung
@@ -467,7 +467,7 @@ boolean pruefeSystem() {
 [[liveness-und-readiness-zustaende]]
 ==== Liveness und Readiness Zustände
 
-Wie in Kapitel xref:konzept/master.adoc#informationen-ueber-den-systemzustand[Informationen über den Systemzustand] beschrieben sind _Liveness_ und _Readiness_ Zustände, die einem feingranularen Monitoring dienen.
+Wie in Kapitel xref:konzept.adoc#informationen-ueber-den-systemzustand[Informationen über den Systemzustand] beschrieben sind _Liveness_ und _Readiness_ Zustände, die einem feingranularen Monitoring dienen.
 
 Anwendungen nach dem IsyFact Standard sollen, neben dem Health-Zustand, Informationen über diese Zustände zur Verfügung stellen.
 _Liveness_ und _Readiness_ sind konzeptionell beschrieben und werden nicht von der `isy-überwachung`-Bibliothek zur Verfügung gestellt.
@@ -490,7 +490,7 @@ management.health.readinessState.enabled=true
 
 Damit werden die der Anwendung zur Verfügung stehenden Informationen aus dem `ApplicationContext` und dem Lebenszyklus der Anwendung genutzt, um die Ausprägung des jeweiligen Zustands zu bestimmen.
 Verfügt die Anwendung über keine Abhängigkeiten, die die Zustände beeinflussen, ist die beschriebene Aktivierung zur Verwendung der Zustände ausreichend.
-Ob Abhängigkeiten mit Einfluss auf die Zustände gemäß deren xref:konzept/inhalt.adoc#Liveness-und-Readiness[Definition] bestehen, ist von den Entwickelnden zu beurteilen.
+Ob Abhängigkeiten mit Einfluss auf die Zustände gemäß deren xref:konzept.adoc#Liveness-und-Readiness[Definition] bestehen, ist von den Entwickelnden zu beurteilen.
 
 [[update-des-liveness-states]]
 ===== Update des Liveness States
@@ -521,7 +521,7 @@ In vielen Fällen sind für das korrekte Abbilden der _Readiness_ einer Anwendun
 Die Zustandsindikatoren zeigen an, ob die Anwendung Anfragen korrekt verarbeiten kann.
 Diese Fähigkeit kann von anwendungsinternen Vorgängen abhängen, zum Beispiel der Abschluss des vollständigen Ladens von notwendigen Daten, oder die Erreichbarkeit angebundener externer Systeme.
 Angebundene Systeme, die aus Sicht der Anwendung nutzbar zur Verfügung stehen müssen, sind im _Readiness_-Zustand zu berücksichtigen.
-Gemäß dem IsyFact Vorgaben zählen dazu alle als essenziell eingestuften Nachbarsysteme (Vgl. xref:konzept/inhalt.adoc#nachbarsystemcheck-liveness-Readiness[Überwachungskonzept-Essenzielle Nachbarsysteme].)
+Gemäß dem IsyFact Vorgaben zählen dazu alle als essenziell eingestuften Nachbarsysteme (Vgl. xref:konzept.adoc#nachbarsystemcheck-liveness-Readiness[Überwachungskonzept-Essenzielle Nachbarsysteme].)
 
 
 [[konkrete-implementierung-zustandsaenderungen]]
