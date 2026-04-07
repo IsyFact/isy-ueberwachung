@@ -470,7 +470,8 @@ boolean pruefeSystem() {
 Wie in Kapitel xref:konzept.adoc#informationen-ueber-den-systemzustand[Informationen über den Systemzustand] beschrieben sind _Liveness_ und _Readiness_ Zustände, die einem feingranularen Monitoring dienen.
 
 Anwendungen nach dem IsyFact Standard sollen, neben dem Health-Zustand, Informationen über diese Zustände zur Verfügung stellen.
-_Liveness_ und _Readiness_ sind konzeptionell beschrieben und werden nicht von der `isy-überwachung`-Bibliothek zur Verfügung gestellt.
+_Liveness_ und _Readiness_ sind konzeptionell beschrieben und werden durch Spring Boot bereitgestellt.
+Die Bibliothek `isy-überwachung` ergänzt die _Readiness_ um die zentrale IsyFact-Logik für essenzielle Nachbarsysteme.
 Die tatsächlich korrekte Abbildung der Zustände hängt von den betrieblichen Gegebenheiten und der zu überwachenden Anwendung ab.
 Daher werden hier Vorgaben für die bedarfsgerechte Darstellung von _Liveness_ und _Readiness_ gemacht.
 
@@ -545,17 +546,18 @@ Darüber hinaus lassen sich für die korrekte Abbildung der _Readiness_ vorkonfi
 Spring Boot Actuator bietet, über vorkonfigurierte `HealthIndictor`-Interfaces, die Integration der health-Informationen angebundener Systeme an.
 Diese müssen über Spring Boot-Mechanismen angebunden sein und über zugehörige Konfigurationsdateien im Klassenpfad vorkommen.
 Eine Liste der vorkonfigurierten `HealthIndicators` und detaillierte Informationen sind https://docs.spring.io/spring-boot/reference/actuator/endpoints.html#actuator.endpoints.health.auto-configured-health-indicators[hier] einzusehen.
-Wird die _Readiness_ des Systems von der Erreichbarkeit weiterer essenzieller Nachbarsysteme beeinflusst, sind diese als Komponenten unter der Verwendung des `HealthIndicator`-Interface zu implementieren.
-Bei einer Verwendung der Bibliothek `isy-überwachung`  kann hierfür der `NachbarsystemIndicator` genutzt werden.
+Wird die _Readiness_ des Systems von der Erreichbarkeit weiterer essenzieller Nachbarsysteme beeinflusst, ist bei Verwendung der Bibliothek `isy-überwachung`
+kein eigenes Gruppieren dieser Prüflogik notwendig.
+Die Bibliothek stellt dafür den `NachbarsystemIndicator` unter dem Bean-Namen `isyNachbarsystem` bereit, der zusammen mit `readinessState` in die Readiness-Gruppe eingebunden wird.
 Sind weitere Komponenten in den Zuständen zu berücksichtigen, sind die Vorgaben des Kapitels <<implementierung-weiterer-eigener-health-indikatoren>> zu beachten.
-In den `application.properties` sind alle Indikatoren (`<customCheck>`) in der jeweiligen Gruppe hinzuzufügen:
+Zusätzliche anwendungsspezifische Checks können weiterhin in die Gruppen aufgenommen werden:
 
 .Aktivierung und Gruppierung von _Liveness_ und _Readiness_ in den `application.properties`
 [id="gruppe-liveness-readiness-application-properties",reftext="{listing-caption} {counter:listings }"]
 [source,properties]
 ----
-management.endpoint.health.group.readiness.include=readinessState, <customCheck>
-management.endpoint.health.group.liveness.include=livenessState, <customCheck>
+management.endpoint.health.group.readiness.include=readinessState,isyNachbarsystem,<customCheck>
+management.endpoint.health.group.liveness.include=livenessState,<customCheck>
 ----
 
 Mit dieser Konfiguration in den `application.properties` werden alle in der Gruppe aufgeführten Indikatoren über eine logische UND-Verknüpfung in dem jeweiligen Status berücksichtigt.
