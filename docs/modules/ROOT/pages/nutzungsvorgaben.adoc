@@ -372,7 +372,7 @@ Anwendungen nach IsyFact-Architektur sollen Mechanismen bereitstellen, die es er
 
 Grundlage dafür ist die Bereitstellung eines HealthEndpoints.
 
-[[implementierung-von-ping-und-pruefmethoden]]
+[[implementierung-von-pruefmethoden]]
 ===== Konfiguration des Nachbarsystem-HealthIndicator
 
 Jede Anwendung stellt einen HealthEndpoint unter `/actuator/health` bereit.
@@ -624,3 +624,5 @@ Durch die oben beschriebene Konfiguration kann die gewünschte Verfügbarkeit de
 Zur Steuerung des Loadbalancing-Servlets muss die IsAlive-Datei im Konfigurationsverzeichnis der Anwendung durch den Betrieb angelegt bzw. entfernt werden.
 Der Standardname für die IsAlive-Datei ist `/etc/<anwendungsname>/isAlive`.
 Dieses kann der Betrieb bei Bedarf über ein Shell-Skript automatisieren.
+
+// end::inhalt[]
