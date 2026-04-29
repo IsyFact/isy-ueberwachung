@@ -1,0 +1,12 @@
+name: Semgrep Scan
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - 'support/**'
+  workflow_dispatch: {}
+
+jobs:
+  semgrep-scan:
+    uses: IsyFact/isy-github-actions-templates/.github/workflows/semgrep.yml@v2.5.0
