@@ -5,18 +5,18 @@ import java.util.Map;
 
 import jakarta.servlet.ServletRegistration;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import de.bund.bva.isyfact.ueberwachung.config.LoadbalancerSecurityConfiguration;
 import de.bund.bva.isyfact.ueberwachung.config.LoadbalancerServletConfigurationProperties;
 import de.bund.bva.isyfact.ueberwachung.service.loadbalancer.LoadbalancerServlet;
 
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties
 @ConditionalOnClass(ServletRegistration.class)
 public class IsyLoadbalancerAutoConfiguration {

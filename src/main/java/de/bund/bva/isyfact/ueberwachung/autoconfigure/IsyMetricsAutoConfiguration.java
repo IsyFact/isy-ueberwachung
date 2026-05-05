@@ -3,9 +3,9 @@ package de.bund.bva.isyfact.ueberwachung.autoconfigure;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import de.bund.bva.isyfact.ueberwachung.metrics.ServiceStatistik;
 
@@ -17,7 +17,7 @@ import io.micrometer.core.instrument.binder.MeterBinder;
 /**
  * Metrics autoconfiguration.
  */
-@Configuration
+@AutoConfiguration
 public class IsyMetricsAutoConfiguration {
 
     /** {@link MeterBinder} which registers all available {@link ServiceStatistik} beans. */

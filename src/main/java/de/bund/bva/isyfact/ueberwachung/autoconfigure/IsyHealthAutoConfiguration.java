@@ -2,6 +2,7 @@ package de.bund.bva.isyfact.ueberwachung.autoconfigure;
 
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -28,7 +29,7 @@ import de.bund.bva.isyfact.ueberwachung.config.NachbarsystemRestTemplateConfigur
  * These health endpoint replace the ones configured by spring and furthermore only activate when the usual
  * health endpoint would have been created.
  */
-@Configuration
+@AutoConfiguration
 @PropertySource("classpath:config/health.properties")
 public class IsyHealthAutoConfiguration {
 
