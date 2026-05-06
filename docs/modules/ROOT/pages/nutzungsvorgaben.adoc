@@ -347,13 +347,26 @@ isy.task.tasks.isyHealthTask.fixed-delay=30s
 [[absicherung-von-endpoints]]
 ===== Absicherung von Endpoints
 
-Standardmäßig wird der Zugriff auf Actuator-Endpunkte durch OAuth2/JWT abgesichert, wenn die erforderlichen Spring-Security-Abhängigkeiten im Klassenpfad verfügbar sind und die `IsyActuatorSecurityAutoConfiguration` aktiv ist.
+Standardmäßig wird der Zugriff auf Endpoints durch OAuth2 Authentifizierung abgesichert, wenn die Dependencies:
 
-Der Health-Endpunkt einschließlich der Health-Gruppen `/actuator/health/liveness` und `/actuator/health/readiness` ist unauthentifiziert erreichbar.
-Andere veröffentlichte Actuator-Endpunkte, insbesondere `metrics` und `info`, benötigen ein gültiges JWT mit der Rolle `ENDPOINT_ADMIN`.
-Wird eine eigene `SecurityFilterChain` definiert, muss sichergestellt werden, dass diese die Actuator-Sicherheitsregeln nicht unbeabsichtigt überschreibt.
-Der Health-Endpunkt einschließlich der Health-Gruppen `/actuator/health/liveness` und `/actuator/health/readiness` ist unauthentifiziert erreichbar.
-Andere veröffentlichte Actuator-Endpunkte, insbesondere `metrics` und `info`, benötigen ein gültiges JWT mit der Rolle `ENDPOINT_ADMIN`.
+* `org.springframework.security:spring-security-config` und
+* `org.springframework.security:spring-security-web`
+
+im Klassenpfad verfügbar sind. D.h. hier muss ein Token mitgeschickt werden, das auf Gütligkeit geprüft wird.
+
+Es kann die Security-Konfiguration der Applikation benutzt werden. Dann ist die Absicherung der Monitoring-Endpunkte gleich der API-Endpunkte.
+Existiert keine Standard-Absicherung oder soll gegen einen anderen Endpunkt validiert werden, muss das Property `isy.ueberwachung.security.jwk-set-uri` gesetzt werden.
+
+.Konfiguration der Absicherung in `application.properties`
+[id="listing-endpoint-security-properties",reftext="{listing-caption} {counter:listings }"]
+[source,properties]
+----
+# OAuth2 Absicherung der Überwachungs-Endpunkte (Default: Null)
+# OpenID Connect Zertifikats‑Endpoint
+isy.ueberwachung.security.jwk-set-uri=https://<keycloak-uri>:<port>/auth/realms/<realm>/protocol/openid-connect/certs
+----
+
+Nicht abgesichert ist der Health-Endpoint.
 
 Die Standardabsicherung der Endpoints kann per Konfiguration deaktiviert werden:
 
