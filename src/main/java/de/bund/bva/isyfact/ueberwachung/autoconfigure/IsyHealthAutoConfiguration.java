@@ -2,6 +2,7 @@ package de.bund.bva.isyfact.ueberwachung.autoconfigure;
 
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -23,12 +24,12 @@ import de.bund.bva.isyfact.ueberwachung.config.NachbarsystemConfigurationPropert
 import de.bund.bva.isyfact.ueberwachung.config.NachbarsystemRestTemplateConfigurer;
 
 /**
- * Auto configuration for the {@link HealthEndpoint} and {@link HealthEndpointWebExtension} with a caching
+ * Auto configuration for the {@link HealthEndpoint} and {@link org.springframework.boot.health.actuate.endpoint.HealthEndpointWebExtension} with a caching
  * {@link HealthContributorRegistry}.
  * These health endpoint replace the ones configured by spring and furthermore only activate when the usual
  * health endpoint would have been created.
  */
-@Configuration
+@AutoConfiguration
 @PropertySource("classpath:config/health.properties")
 public class IsyHealthAutoConfiguration {
 
@@ -54,7 +55,8 @@ public class IsyHealthAutoConfiguration {
         return new NachbarsystemCheckImpl(restTemplate);
     }
 
-    @Bean
+    @Bean("isyNachbarsystem")
+    @ConditionalOnMissingBean(name = "isyNachbarsystem")
     @ConditionalOnAvailableEndpoint(endpoint = HealthEndpoint.class)
     public NachbarsystemIndicator nachbarsystemIndicator(NachbarsystemCheck nachbarsystemCheck,
         NachbarsystemConfigurationProperties nachbarsystemConfigurationProperties) {
