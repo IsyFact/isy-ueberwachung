@@ -347,32 +347,45 @@ isy.task.tasks.isyHealthTask.fixed-delay=30s
 [[absicherung-von-endpoints]]
 ===== Absicherung von Endpoints
 
-Standardmäßig wird der Zugriff auf Endpoints durch OAuth2 Authentifizierung abgesichert, wenn die Dependencies:
+Standardmäßig wird der Zugriff auf veröffentlichte Actuator-Endpunkte durch OAuth2/JWT abgesichert, wenn die erforderlichen Spring-Security-Abhängigkeiten im Klassenpfad verfügbar sind und die `IsyActuatorSecurityAutoConfiguration` aktiv ist.
 
-* `org.springframework.security:spring-security-config` und
+Für die Absicherung werden folgende Dependencies benötigt:
+
+* `org.springframework.security:spring-security-config`
 * `org.springframework.security:spring-security-web`
 
-im Klassenpfad verfügbar sind. D.h. hier muss ein Token mitgeschickt werden, das auf Gütligkeit geprüft wird.
+Der Health-Endpunkt einschließlich der Health-Gruppen `/actuator/health/liveness` und `/actuator/health/readiness` ist unauthentifiziert erreichbar.
+Diese Endpunkte müssen für Kubernetes-Probes, Loadbalancer und vergleichbare Betriebsmechanismen ohne Authentifizierung abrufbar sein.
 
-Es kann die Security-Konfiguration der Applikation benutzt werden. Dann ist die Absicherung der Monitoring-Endpunkte gleich der API-Endpunkte.
-Existiert keine Standard-Absicherung oder soll gegen einen anderen Endpunkt validiert werden, muss das Property `isy.ueberwachung.security.jwk-set-uri` gesetzt werden.
+Andere veröffentlichte Actuator-Endpunkte, insbesondere `metrics` und `info`, benötigen ein gültiges JWT mit der Rolle `ENDPOINT_ADMIN`.
+
+Ist in der Anwendung bereits eine passende OAuth2-/JWT-Konfiguration vorhanden, kann diese für die Absicherung der Monitoring-Endpunkte verwendet werden.
+Existiert keine Standard-Absicherung oder soll gegen einen anderen OpenID-Connect-Zertifikats-Endpunkt validiert werden, muss das Property `isy.ueberwachung.security.jwk-set-uri` gesetzt werden.
 
 .Konfiguration der Absicherung in `application.properties`
 [id="listing-endpoint-security-properties",reftext="{listing-caption} {counter:listings }"]
 [source,properties]
 ----
-# OAuth2 Absicherung der Überwachungs-Endpunkte (Default: Null)
-# OpenID Connect Zertifikats‑Endpoint
+# OpenID-Connect-Zertifikats-Endpunkt zur Validierung der JWT-Signatur
 isy.ueberwachung.security.jwk-set-uri=https://<keycloak-uri>:<port>/auth/realms/<realm>/protocol/openid-connect/certs
 ----
 
-Nicht abgesichert ist der Health-Endpoint.
+[WARNING]
+====
+Wird in einer Anwendung eine eigene `SecurityFilterChain` definiert, muss sichergestellt werden, dass die Actuator-Sicherheitsregeln nicht unbeabsichtigt überschrieben werden.
 
-Die Standardabsicherung der Endpoints kann per Konfiguration deaktiviert werden:
+Insbesondere dürfen `metrics`, `info` und weitere veröffentlichte Actuator-Endpunkte nicht durch eine allgemeine `permitAll`-Regel öffentlich erreichbar werden.
+====
 
-`spring.autoconfigure.exclude=de.bund.bva.isyfact.ueberwachung.autoconfigure.IsyActuatorSecurityAutoConfiguration`
+Die Standardabsicherung der Actuator-Endpunkte kann per Konfiguration deaktiviert werden:
 
-Dabei muss beachtet werden, dass über die Endpoints sensible Informationen bereitgestellt werden!
+[source,properties]
+----
+spring.autoconfigure.exclude=de.bund.bva.isyfact.ueberwachung.autoconfigure.IsyActuatorSecurityAutoConfiguration
+----
+
+Dabei muss beachtet werden, dass über Actuator-Endpunkte sensible technische Informationen bereitgestellt werden können.
+Wird die Standardabsicherung deaktiviert, muss die Anwendung oder die Betriebsumgebung eine gleichwertige Absicherung bereitstellen.
 
 Bei zusätzlichen Anforderungen an die Absicherung können die in <<listing-endpoint-security-config>> definierten Beans individuell überschrieben werden.
 
