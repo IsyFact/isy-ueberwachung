@@ -23,7 +23,8 @@ Alle Vorgaben orientieren sich an den jeweiligen Kapiteln aufgeführten Anforder
 In diesem Kapitel werden die Anforderungen an die Überwachung von Anwendungen beschrieben.
 Für die Überwachung wird der Actuator von Spring Boot eingesetzt.
 Actuator bringt eine Reihe von eingebauten Endpoints mit und bietet auch die Möglichkeit, eigene Endpoints hinzuzufügen.
-So werden für Informationen über den Systemzustand die eingebauten Endpunkte `health`, `liveness`,`readiness` angeboten.
+So werden für Informationen über den Systemzustand der Actuator-Endpunkt `health` sowie die darunterliegenden Health-Gruppen `liveness` und `readiness` angeboten.
+Die Gruppen sind unter `/actuator/health/liveness` und `/actuator/health/readiness` erreichbar.
 Über den Endpoint `metrics` können Metriken gelesen werden.
 Die bereitgestellten Metriken werden von Micrometer erfasst.
 Eine nähere Beschreibung des Konzeptes findet sich im Dokument xref:konzept.adoc#einleitung[Überwachung - Konzept].
@@ -46,7 +47,8 @@ Für die Überwachbarkeit der Anwendungen werden die folgenden Festlegungen getr
 Alle nicht benötigten Endpoints sind zu deaktivieren.
 * Endpoints werden nur passiv benutzt.
 Die Anwendung wird nicht darüber konfiguriert.
-* Der Zugriff auf Endpoints wird mit OAuth2-Token abgesichert.
+* Health ist unauthentifiziert erreichbar.
+* Andere Actuator-Endpunkte benötigen ein gültiges `JWT` mit Rolle `ENDPOINT_ADMIN`.
 * Anwendungen stellen einen definierten Satz von Überwachungsinformationen bereit.
 
 Beispielhaft wird eine mögliche Konfiguration zur Anbindung beschrieben.
@@ -156,7 +158,7 @@ Zusätzlich zu den eingebauten Metriken kann eine Anwendung selber Metriken aufz
 Zum Einsatz von eigenen Metriken werden die von Micrometer angebotenen abstrakten `Meter` über eine `MeterRegistry` registriert und dann in der Anwendung mit Daten befüllt.
 
 
-Die `MeterRegistriy` wird von Spring per Dependency Injection bereitgestellt.
+Die `MeterRegistry` wird von Spring per Dependency Injection bereitgestellt.
 Bei der Registrierung eines Meters ist ein Tag zur Unterscheidung und eine Beschreibung zu setzen.
 Ein Beispiel zur Registrierung und Verwendung eines `Meters` am Beispiel eines `Counters` zeigt <<listing-custommeter>>.
 Dort wird ein `Counter` mit dem Namen `eintrag.neu` mit einem Tag registriert, der aus einem Schlüssel `komponente` mit dem Wert `verwaltung` besteht.
@@ -293,12 +295,13 @@ Authentifizierung abgesichert.
 [[konfiguration-von-endpoints]]
 ===== Konfiguration von Endpoints
 
-Zur Überwachung einer Anwendung werden die folgenden eingebauten Endpoints verwendet:
+Zur Überwachung einer Anwendung stehen die folgenden eingebauten Endpoints bereit:
 
 * `health`,
-* `liveness`,
-* `readiness`,
-* `metrics`.
+* `metrics`,
+* `info`.
+
+Unterhalb des `health`-Endpoints stehen die Health-Gruppen `liveness` und `readiness` bereit.
 
 Diese sind bereits mit Standardwerten konfiguriert.
 Da der Endpoint `health` seine Informationen aus einem Cache abfragt, welcher von einem Task befüllt wird, werden die in <<listing-task-activation>> gezeigten Properties in `application.properties` gesetzt, um das Starten der Tasks zu aktivieren.
@@ -306,14 +309,14 @@ Da der Endpoint `health` seine Informationen aus einem Cache abfragt, welcher vo
 .Properties zur Aktivierung des Tasks
 [id="listing-task-activation",reftext="{listing-caption} {counter:listings }"]
 ----
-isy.task.default.host=
+isy.task.tasks.isyHealthTask-execute.host=
 ----
 
 Endpoints können einzeln aktiviert oder deaktiviert werden.
 Damit wird gesteuert, ob der Endpoint erstellt wird und die dafür notwendigen Beans erzeugt werden.
 Für den Zugriff von außerhalb muss der Endpoint zusätzlich über eine Schnittstelle (HTTP oder JMX) bereitgestellt werden.
 
-Da von Spring standardmäßig fast alle Endpoints aktiviert sind, werden zunächst alle Endpoints ausgeschaltet, und anschließend die Endpoints `health`, `liveness`, `readiness` und `metrics` explizit wieder aktiviert.
+Da von Spring standardmäßig fast alle Endpoints aktiviert sind, werden zunächst alle Endpoints ausgeschaltet, und anschließend die Endpoints `health`, `metrics` und `info` explizit wieder aktiviert.
 Die Bereitstellung der Endpoints erfolgt nur über HTTP.
 
 Der Task für die Aktualisierung der Informationen für den Endpoint `health` muss regelmäßig ausgeführt werden.
@@ -326,11 +329,15 @@ Diese können bei Bedarf in `application.properties` überschrieben werden.
 [id="listing-endpointconfig-defaults",reftext="{listing-caption} {counter:listings }"]
 ----
 management.endpoints.access.default=none
+management.endpoint.health.show-details=never
 management.endpoint.health.access=unrestricted
 management.endpoint.metrics.access=unrestricted
 management.endpoint.info.access=unrestricted
 management.endpoints.jmx.exposure.exclude=*
 management.endpoints.web.exposure.include=health,metrics,info
+
+management.endpoint.health.group.readiness.include=readinessState,isyNachbarsystem
+management.endpoint.health.group.liveness.include=livenessState
 
 isy.task.tasks.isyHealthTask.ausfuehrung=FIXED_DELAY
 isy.task.tasks.isyHealthTask.initial-delay=5s
@@ -340,32 +347,45 @@ isy.task.tasks.isyHealthTask.fixed-delay=30s
 [[absicherung-von-endpoints]]
 ===== Absicherung von Endpoints
 
-Standardmäßig wird der Zugriff auf Endpoints durch OAuth2 Authentifizierung abgesichert, wenn die Dependencies:
+Standardmäßig wird der Zugriff auf veröffentlichte Actuator-Endpunkte durch OAuth2/JWT abgesichert, wenn die erforderlichen Spring-Security-Abhängigkeiten im Klassenpfad verfügbar sind und die `IsyActuatorSecurityAutoConfiguration` aktiv ist.
 
-* `org.springframework.security:spring-security-config` und
+Für die Absicherung werden folgende Dependencies benötigt:
+
+* `org.springframework.security:spring-security-config`
 * `org.springframework.security:spring-security-web`
 
-im Klassenpfad verfügbar sind. D.h. hier muss ein Token mitgeschickt werden, das auf Gütligkeit geprüft wird.
+Der Health-Endpunkt einschließlich der Health-Gruppen `/actuator/health/liveness` und `/actuator/health/readiness` ist unauthentifiziert erreichbar.
+Diese Endpunkte müssen für Kubernetes-Probes, Loadbalancer und vergleichbare Betriebsmechanismen ohne Authentifizierung abrufbar sein.
 
-Es kann die Security-Konfiguration der Applikation benutzt werden. Dann ist die Absicherung der Monitoring-Endpunkte gleich der API-Endpunkte.
-Existiert keine Standard-Absicherung oder soll gegen einen anderen Endpunkt validiert werden, muss das Property `isy.ueberwachung.security.jwk-set-uri` gesetzt werden.
+Andere veröffentlichte Actuator-Endpunkte, insbesondere `metrics` und `info`, benötigen ein gültiges JWT mit der Rolle `ENDPOINT_ADMIN`.
+
+Ist in der Anwendung bereits eine passende OAuth2-/JWT-Konfiguration vorhanden, kann diese für die Absicherung der Monitoring-Endpunkte verwendet werden.
+Existiert keine Standard-Absicherung oder soll gegen einen anderen OpenID-Connect-Zertifikats-Endpunkt validiert werden, muss das Property `isy.ueberwachung.security.jwk-set-uri` gesetzt werden.
 
 .Konfiguration der Absicherung in `application.properties`
 [id="listing-endpoint-security-properties",reftext="{listing-caption} {counter:listings }"]
 [source,properties]
 ----
-# OAuth2 Absicherung der Überwachungs-Endpunkte (Default: Null)
-# OpenID Connect Zertifikats‑Endpoint
+# OpenID-Connect-Zertifikats-Endpunkt zur Validierung der JWT-Signatur
 isy.ueberwachung.security.jwk-set-uri=https://<keycloak-uri>:<port>/auth/realms/<realm>/protocol/openid-connect/certs
 ----
 
-Nicht abgesichert ist der Health-Endpoint.
+[WARNING]
+====
+Wird in einer Anwendung eine eigene `SecurityFilterChain` definiert, muss sichergestellt werden, dass die Actuator-Sicherheitsregeln nicht unbeabsichtigt überschrieben werden.
 
-Die Standardabsicherung der Endpoints kann per Konfiguration deaktiviert werden:
+Insbesondere dürfen `metrics`, `info` und weitere veröffentlichte Actuator-Endpunkte nicht durch eine allgemeine `permitAll`-Regel öffentlich erreichbar werden.
+====
 
-`spring.autoconfigure.exclude=de.bund.bva.isyfact.ueberwachung.autoconfigure.IsyActuatorSecurityAutoConfiguration`
+Die Standardabsicherung der Actuator-Endpunkte kann per Konfiguration deaktiviert werden:
 
-Dabei muss beachtet werden, dass über die Endpoints sensible Informationen bereitgestellt werden!
+[source,properties]
+----
+spring.autoconfigure.exclude=de.bund.bva.isyfact.ueberwachung.autoconfigure.IsyActuatorSecurityAutoConfiguration
+----
+
+Dabei muss beachtet werden, dass über Actuator-Endpunkte sensible technische Informationen bereitgestellt werden können.
+Wird die Standardabsicherung deaktiviert, muss die Anwendung oder die Betriebsumgebung eine gleichwertige Absicherung bereitstellen.
 
 Bei zusätzlichen Anforderungen an die Absicherung können die in <<listing-endpoint-security-config>> definierten Beans individuell überschrieben werden.
 
@@ -390,7 +410,11 @@ Jede Anwendung stellt einen HealthEndpoint unter `/actuator/health` bereit.
 Zur Konfiguration siehe auch <<konfiguration-von-endpoints>>.
 Dieser zeigt den Status des Systems abhängig von allen vorhandenen Health-Indikatoren (`HealthIndicator`).
 
-Der Baustein liefert einen Nachbarsystem-Indikator mit, der den HealthEndpoint aller konfigurierten xref:glossary::terms-definitions.adoc#nachbarsystem[Nachbarsysteme] abfragt.
+Der Baustein liefert einen Nachbarsystem-Indikator mit, der für alle konfigurierten xref:glossary::terms-definitions.adoc#nachbarsystem[Nachbarsysteme] die jeweils konfigurierte Health-URL abfragt.
+Für nach IsyFact betriebene Nachbarsysteme soll bevorzugt der Readiness-Endpunkt `/actuator/health/readiness` verwendet werden.
+Der Baustein liefert einen Nachbarsystem-Indikator mit, der den HealthEndpoint oder den Readiness-Zustand aller konfigurierten Nachbarsysteme abfragt.
+Die Klasse `NachbarsystemIndicator` wird durch `isy-ueberwachung` als Health-Contributor mit dem Namen `isyNachbarsystem` registriert.
+Dieser Contributor ist standardmäßig Teil der Readiness-Gruppe.
 
 Dieser lässt sich wie folgt konfigurieren:
 
@@ -403,7 +427,7 @@ isy.ueberwachung.nachbarsystemcheck.timeout=2s
 
 ## Konfiguration eines Nachbarsystems, das überwacht wird
 isy.ueberwachung.nachbarsysteme.beispielnachbar.systemname=Beispielnachbar
-isy.ueberwachung.nachbarsysteme.beispielnachbar.healthendpoint=http(s)://example.com/actuator/health
+isy.ueberwachung.nachbarsysteme.beispielnachbar.healthendpoint=http(s)://example.com/actuator/health/readiness
 isy.ueberwachung.nachbarsysteme.beispielnachbar.essentiell=false
 
 # weitere Nachbarn
@@ -417,9 +441,11 @@ Im Listing oben ist `beispielnachbar` ein selbst zu wählender Schlüssel.
 Für jeden Schlüssel sind folgende Properties zu setzen:
 
 * `systemname`: Wird in der Log-Ausgabe als Name des Nachbarsystems verwendet
-* `healthendpoint`: Die URL, unter der der HealthEndpoint des Nachbarsystems zu erreichen ist
+* `healthendpoint`: Die URL, unter der der HealthEndpoint oder der Readiness-Zustand des Nachbarsystems zu erreichen ist
 * `essentiell` (`true`/`false`) : Ist ein essenzielles Nachbarsystem nicht erreichbar, wird der Status des Nachbarsystem-Indikators auf DOWN gesetzt und ein Error geloggt.
-Nicht essenzielle Nachbarsysteme beeinflussen den Status nicht und werden, falls sie nicht erreichbar sind, nur als Warning geloggt.
+Zusätzlich liefert `isyNachbarsystem` den Status DOWN.
+Da `isyNachbarsystem` standardmäßig Teil der Readiness-Gruppe ist, wird auch `/actuator/health/readiness` DOWN.
+Nicht essenzielle Nachbarsysteme beeinflussen den Health-Status und die Readiness nicht und werden, falls sie nicht erreichbar sind, nur als Warning geloggt.
 
 ==== Korrelations-ID bei einem Nachbarsystem-HealthIndicator
 Eine Korrelations-ID muss gesetzt werden, wenn ein `HealthIndicator` ein Nachbarsystem aufruft.
@@ -480,29 +506,34 @@ boolean pruefeSystem() {
 
 Wie in Kapitel xref:konzept.adoc#informationen-ueber-den-systemzustand[Informationen über den Systemzustand] beschrieben sind _Liveness_ und _Readiness_ Zustände, die einem feingranularen Monitoring dienen.
 
-Anwendungen nach dem IsyFact Standard sollen, neben dem Health-Zustand, Informationen über diese Zustände zur Verfügung stellen.
-_Liveness_ und _Readiness_ sind konzeptionell beschrieben und werden durch Spring Boot bereitgestellt.
-Die Bibliothek `isy-überwachung` ergänzt die _Readiness_ um die zentrale IsyFact-Logik für essenzielle Nachbarsysteme.
+Anwendungen nach dem IsyFact Standard müssen, neben dem Health-Zustand, Informationen über diese Zustände zur Verfügung stellen.
+Für die Traffic-Steuerung, Loadbalancer oder Service-Mesh-Policies ist der Endpunkt `/actuator/health/readiness` maßgeblich.
+Der bestehende Endpunkt `/actuator/health` bleibt aus Gründen der Abwärtskompatibilität unverändert verfügbar und dient weiterhin der allgemeinen Systemzustandsanzeige.
+Die Bibliothek `isy-ueberwachung` ergänzt die _Readiness_ um die zentrale IsyFact-Logik für essenzielle Nachbarsysteme.
 Die tatsächlich korrekte Abbildung der Zustände hängt von den betrieblichen Gegebenheiten und der zu überwachenden Anwendung ab.
 Daher werden hier Vorgaben für die bedarfsgerechte Darstellung von _Liveness_ und _Readiness_ gemacht.
 
 [[bereitstellen-von-liveness-und-readiness-probes]]
 ===== Bereitstellen von Liveness und Readiness Probes
 
-_Liveness_ und _Readiness_ Probes können in der Anwendungskonfiguration aktiviert werden: (vgl. https://www.baeldung.com/spring-liveness-readiness-probes[Baeldung: Liveness und Readiness Probes in Spring Boot]):
+Die Bibliothek stellt Liveness und Readiness standardmäßig über Spring Boot Health Groups bereit.
+Standardmäßig gelten folgende Gruppen:
 
-.Aktivierung von Liveness und Readiness in den `application.properties`
-[id="listing-enable-liveness-readiness-states",reftext="{listing-caption} {counter:listings }"]
 [source,properties]
 ----
-management.endpoint.health.probes.enabled=true
-management.health.livenessState.enabled=true
-management.health.readinessState.enabled=true
+management.endpoint.health.group.liveness.include=livenessState
+management.endpoint.health.group.readiness.include=readinessState,isyNachbarsystem
 ----
 
-Damit werden die der Anwendung zur Verfügung stehenden Informationen aus dem `ApplicationContext` und dem Lebenszyklus der Anwendung genutzt, um die Ausprägung des jeweiligen Zustands zu bestimmen.
-Verfügt die Anwendung über keine Abhängigkeiten, die die Zustände beeinflussen, ist die beschriebene Aktivierung zur Verwendung der Zustände ausreichend.
-Ob Abhängigkeiten mit Einfluss auf die Zustände gemäß deren xref:konzept.adoc#Liveness-und-Readiness[Definition] bestehen, ist von den Entwickelnden zu beurteilen.
+Der `readinessState` bildet den nativen Spring-Boot-Lifecycle der Anwendung ab und `isyNachbarsystem` ist der bereitgestellte Health-Contributor für konfigurierte Nachbarsysteme.
+Essenzielle Nachbarsysteme beeinflussen dadurch standardmäßig `/actuator/health/readiness`.
+
+Der bestehende Endpunkt `/actuator/health` bleibt unverändert erhalten.
+Für die Traffic-Steuerung, Loadbalancer oder Service-Mesh-Policies ist `/actuator/health/readiness` maßgeblich.
+Für Neustartentscheidungen ist `/actuator/health/liveness` zu verwenden.
+
+Bestehende Anwendungen müssen nichts anpassen.
+Anwendungen, die eigene Readiness-Gruppen konfigurieren, müssen die Default-Includes beibehalten.
 
 [[update-des-liveness-states]]
 ===== Update des Liveness States
@@ -540,8 +571,9 @@ Gemäß dem IsyFact Vorgaben zählen dazu alle als essenziell eingestuften Nachb
 ===== Konkrete Implementierung von Zustandsänderungen
 
 Grundsätzlich besteht für jede Komponente die Möglichkeit, den Zustand der Anwendung direkt über ein `AvailabilityChangeEvent` zu verändern.
-Durch die dieses Events wird die Zustandsänderung in den Gesamtstatus der Anwendung integriert.
-Damit ist eine vorhandene Implementierung um eine Veränderung des jeweils relevanten Zustands erweiterbar zum Beispiel bei der Verarbeitung von _Exceptions_.
+Durch dieses Event wird der von Spring Boot verwaltete Availability-State der Anwendung verändert.
+Dieser State wird über `livenessState` bzw. `readinessState` in den jeweiligen Health-Gruppen sichtbar.
+Damit ist eine vorhandene Implementierung um eine Veränderung des jeweils relevanten Zustands erweiterbar.
 
 .AvailabilityChangeEvent
 [id="listing-implementing-availability-change-events",reftext="{listing-caption} {counter:listings }"]
@@ -554,10 +586,10 @@ AvailabilityChangeEvent.publish(context, ReadinessState.REFUSING_TRAFFIC);
 Sind weitere Indikatoren für den _Liveness_- oder _Readiness_-Zustand relevant, sind Gruppen zu nutzen (Vgl. https://docs.spring.io/spring-boot/docs/2.2.x/reference/html/production-ready-features.html#health-groups[Spring Boot Health Groups]).
 Dieses Vorgehen ermöglicht eine strukturierte Übersicht und erleichtert die Veränderbarkeit der Überwachung, wenn auf Anwendungsänderungen oder veränderte Betriebsbedingungen zu reagieren ist.
 Darüber hinaus lassen sich für die korrekte Abbildung der _Readiness_ vorkonfiguriert Informationen angebundener Systeme nutzen.
-Spring Boot Actuator bietet, über vorkonfigurierte `HealthIndictor`-Interfaces, die Integration der health-Informationen angebundener Systeme an.
+Spring Boot Actuator bietet, über vorkonfigurierte `HealthIndicator`-Interfaces, die Integration der health-Informationen angebundener Systeme an.
 Diese müssen über Spring Boot-Mechanismen angebunden sein und über zugehörige Konfigurationsdateien im Klassenpfad vorkommen.
 Eine Liste der vorkonfigurierten `HealthIndicators` und detaillierte Informationen sind https://docs.spring.io/spring-boot/reference/actuator/endpoints.html#actuator.endpoints.health.auto-configured-health-indicators[hier] einzusehen.
-Wird die _Readiness_ des Systems von der Erreichbarkeit weiterer essenzieller Nachbarsysteme beeinflusst, ist bei Verwendung der Bibliothek `isy-überwachung`
+Wird die _Readiness_ des Systems von der Erreichbarkeit weiterer essenzieller Nachbarsysteme beeinflusst, ist bei Verwendung der Bibliothek `ueberwachung`
 kein eigenes Gruppieren dieser Prüflogik notwendig.
 Die Bibliothek stellt dafür den `NachbarsystemIndicator` unter dem Bean-Namen `isyNachbarsystem` bereit, der zusammen mit `readinessState` in die Readiness-Gruppe eingebunden wird.
 Sind weitere Komponenten in den Zuständen zu berücksichtigen, sind die Vorgaben des Kapitels <<implementierung-weiterer-eigener-health-indikatoren>> zu beachten.
@@ -571,28 +603,33 @@ management.endpoint.health.group.readiness.include=readinessState,isyNachbarsyst
 management.endpoint.health.group.liveness.include=livenessState,<customCheck>
 ----
 
-Mit dieser Konfiguration in den `application.properties` werden alle in der Gruppe aufgeführten Indikatoren über eine logische UND-Verknüpfung in dem jeweiligen Status berücksichtigt.
+Mit dieser Konfiguration in den `application.properties` werden alle in der Gruppe aufgeführten Indikatoren verknüpft.
+Der schlechteste relevante Status der Gruppenmitglieder bestimmt den Gruppenstatus gemäß Spring-Boot-Statusaggregation.
 
 
 [[logging-der-zustandsaenderung]]
 ===== Logging der Zustandsänderung
 
-Wenn sich der Zustand ändert, ist dies im Logging zu protokollieren.
-Dieses Vorgehen ist gegenüber dem Protokollieren jeder Zustandsprüfung zu bevorzugen.
-Das Protokollvolumen wird reduziert und Probleme zu erkennen wird vereinfacht.
+Änderungen des Liveness- oder Readiness-Zustands sind im Logging zu protokollieren.
+Dabei ist die Zustandsänderung zu protokollieren, nicht jede einzelne Zustandsprüfung.
 
-.`EventListener` zum Loggen der Zustandsänderung
-[id="eventlistener-zum-loggen-der-Zustandsaenderung",reftext="{listing-caption} {counter:listings }"]
-[source,properties]
-[source, java]
-----
+Das Logging muss erkennen lassen,
 
-@EventListener
-public void onApplicationEvent(AbstractHealthIndicator healthIndicator) {
-    // Log der Veränderung des Liveness- oder Readiness-Zustands mit einer Fallunterscheidung
-}
-----
+* welcher Zustand betroffen ist (`Liveness` oder `Readiness`),
+* welcher neue Zustand eingetreten ist,
+* welche Komponente oder welcher Indikator die Änderung ausgelöst hat,
+* zu welchem Zeitpunkt die Änderung erkannt wurde.
 
+Dieses Vorgehen reduziert das Protokollvolumen gegenüber dem Protokollieren jeder Health-Prüfung und erleichtert die Analyse von Verfügbarkeitsproblemen.
+
+Für durch Spring Boot verwaltete Zustände sind die Ereignisse von `ApplicationAvailability` maßgeblich.
+Änderungen an `LivenessState` und `ReadinessState` sollen über die entsprechenden Spring-Boot-Availability-Events ausgewertet werden.
+
+Für zusätzliche Health-Indikatoren, insbesondere `isyNachbarsystem`, ist sicherzustellen, dass Statusänderungen nachvollziehbar sind.
+Bei Nachbarsystemen muss protokolliert werden, wenn ein essenzielles Nachbarsystem nicht erreichbar ist und nach einer Störung wieder erreichbar wird.
+Nicht essenzielle Nachbarsysteme sollen bei Nichterreichbarkeit nur als Warnung protokolliert werden.
+
+Das Logging darf keine sensiblen Informationen enthalten.
 
 [[anbindung-eines-monitoring-systems]]
 === Anbindung eines Monitoring-Systems
@@ -601,6 +638,9 @@ Zur Anbindung eines konkreten Monitoring-Systems wird die passende Meter Registr
 
 Die Namen der Abhängigkeiten folgen dem Schema `micrometer-registry-<Monitoring-System>`.
 Soll beispielweise _Prometheus_ angebunden werden, muss die folgende Abhängigkeit eingetragen werden.
+Der Prometheus-Endpoint ist zusätzlich nicht automatisch exposed und muss bewusst freigeschaltet werden.
+Der Prometheus-Endpunkt ist kein Ersatz für den `metrics`-Endpoint.
+Er stellt Micrometer-Metriken im Prometheus-Scrape-Format bereit und muss betrieblich abgesichert werden, z. B. über Netzwerksegmentierung, Service Mesh oder die Actuator-Security-Konfiguration.
 
 [source,xml]
 ----
