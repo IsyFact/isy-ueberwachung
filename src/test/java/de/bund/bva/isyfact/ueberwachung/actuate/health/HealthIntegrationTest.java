@@ -1,5 +1,7 @@
 package de.bund.bva.isyfact.ueberwachung.actuate.health;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,40 +36,54 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import de.bund.bva.isyfact.ueberwachung.actuate.health.nachbarsystemcheck.model.NachbarsystemHealth;
 import de.bund.bva.isyfact.ueberwachung.autoconfigure.IsyHealthAutoConfiguration;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @AutoConfigureWebTestClient
 @AutoConfigureMockMvc
 @SpringBootTest(
-    classes = {IsyHealthAutoConfiguration.class, HealthIntegrationTest.TestConfig.class},
-    properties = {
-        "isy.logging.anwendung.name=HealthIntegrationTest",
-        "isy.logging.anwendung.version=1.0.0-SNAPSHOT",
-        "isy.logging.anwendung.typ=Integrationstest"
-    }
+        classes = {IsyHealthAutoConfiguration.class, HealthIntegrationTest.TestConfig.class},
+        properties = {
+                "isy.logging.anwendung.name=HealthIntegrationTest",
+                "isy.logging.anwendung.version=1.0.0-SNAPSHOT",
+                "isy.logging.anwendung.typ=Integrationstest",
+                "isy.ueberwachung.security.jwk-set-uri=https://<keycloak-host>:<port>/auth/realms/<realm>/protocol/openid-connect/certs"
+        }
 )
 class HealthIntegrationTest {
 
+    /**
+     * The delay.
+     */
     static final int DELAY_MS = 5000;
 
-    // must correspond to the name of the HealthIndicator-Bean
-    private static final String testComponentName = "testComponent";
-    private static final String testInstanceName = "testInstance";
+    /**
+     * Test component name.
+     * must correspond to the name of the HealthIndicator-Bean
+     */
+    private static final String TEST_COMPONENT_NAME = "testComponent";
 
+    /**
+     * Test instance name.
+     */
+    private static final String TEST_INSTANCE_NAME = "testInstance";
+
+    /**
+     * The webClient.
+     */
     @Autowired
-    WebTestClient webClient;
+    private WebTestClient webClient;
 
+    /**
+     * webEndpoint properties.
+     */
     @Autowired
     private WebEndpointProperties webEndpointProperties;
-
 
 
     @Test
     void test1_initialerStatusUp() {
         var healthResponse = actuatorCall("/health").expectStatus().isOk()
-            .expectBody(NachbarsystemHealth.class)
-            .returnResult().getResponseBody();
+                .expectBody(NachbarsystemHealth.class)
+                .returnResult().getResponseBody();
         assertThat(healthResponse).isNotNull();
         assertThat(healthResponse.getStatus()).isEqualTo(Status.UP);
         assertThat(healthResponse.getDetails()).isEmpty();
@@ -78,8 +94,8 @@ class HealthIntegrationTest {
         Thread.sleep(DELAY_MS + 500);
 
         var healthResponse = actuatorCall("/health").expectStatus().isOk()
-            .expectBody(NachbarsystemHealth.class)
-            .returnResult().getResponseBody();
+                .expectBody(NachbarsystemHealth.class)
+                .returnResult().getResponseBody();
         assertThat(healthResponse).isNotNull();
         assertThat(healthResponse.getStatus()).isEqualTo(Status.UP);
         assertThat(healthResponse.getDetails()).isEmpty();
@@ -93,8 +109,8 @@ class HealthIntegrationTest {
      */
     @Test
     void test3_andereEndpointsLiefern404() {
-        actuatorCall("/health/" + testComponentName).expectStatus().isNotFound();
-        actuatorCall("/health/" + testComponentName + "/" + testInstanceName).expectStatus().isNotFound();
+        actuatorCall("/health/" + TEST_COMPONENT_NAME).expectStatus().isNotFound();
+        actuatorCall("/health/" + TEST_COMPONENT_NAME + "/" + TEST_INSTANCE_NAME).expectStatus().isNotFound();
     }
 
     @Test
@@ -105,8 +121,8 @@ class HealthIntegrationTest {
     //Test actuator with invalid token
     @Test
     void test5_infoEnabled() {
-        AbstractOAuth2TokenAuthenticationToken<?> token = setSecurityContext("test","test","300020");
-        actuatorCallWithInvalidToken("/info",token).expectStatus().isUnauthorized();
+        AbstractOAuth2TokenAuthenticationToken<?> token = setSecurityContext("test", "test", "300020");
+        actuatorCallWithInvalidToken("/info", token).expectStatus().isUnauthorized();
     }
 
     @Test
@@ -127,9 +143,9 @@ class HealthIntegrationTest {
     //Test actuator with old basic auth
     private WebTestClient.ResponseSpec actuatorCall(String endpoint) {
         return webClient
-            .get().uri(webEndpointProperties.getBasePath() + endpoint)
-                .headers(headers -> headers.setBasicAuth("dummy","dummy"))
-            .exchange();
+                .get().uri(webEndpointProperties.getBasePath() + endpoint)
+                .headers(headers -> headers.setBasicAuth("dummy", "dummy"))
+                .exchange();
     }
 
     private WebTestClient.ResponseSpec actuatorCallWithoutAuth(String endpoint) {
@@ -140,9 +156,9 @@ class HealthIntegrationTest {
 
     private WebTestClient.ResponseSpec actuatorCallWithInvalidToken(String endpoint, AbstractOAuth2TokenAuthenticationToken<?> token) {
         return webClient.get()
-            .uri(webEndpointProperties.getBasePath() + endpoint)
+                .uri(webEndpointProperties.getBasePath() + endpoint)
                 .headers((headers) -> headers.add("authorization", "Bearer " + "A56D8C299784E0801937C3BC8B229322"))
-            .exchange();
+                .exchange();
     }
 
 
@@ -151,14 +167,17 @@ class HealthIntegrationTest {
     static class TestConfig {
 
         // creates a new indicator under /actuator/health/testComponent/testInstance
-        @Bean(testComponentName)
+        @Bean(TEST_COMPONENT_NAME)
         public HealthContributor testComponent() {
             Map<String, HealthIndicator> healthIndicatorMap = new HashMap<>();
-            healthIndicatorMap.put(testInstanceName, () -> Health.up().build());
+            healthIndicatorMap.put(TEST_INSTANCE_NAME, () -> Health.up().build());
             return CompositeHealthContributor.fromMap(healthIndicatorMap);
         }
     }
 
+    /**
+     * the jwtAuthenticationConverter.
+     */
     @Autowired
     private JwtAuthenticationConverter jwtAuthenticationConverter;
 

@@ -4,12 +4,17 @@
 - `IFS-5234`: Hinzugefügt: Konzeptionelles Readiness- und Liveness-Modell für IF.5
 - `IFS-4818`: Autokonfiguration von Load Balancer separiert
 - `IFS-4748`: Dokumentation von aktualisierten Properties
+- `IFS-5434`: Absicherung der Aktuatoren durch OAuth2.
 
 ### BREAKING CHANGES
 - `IFS-4791`: Entfernt Metriken mit Zeiteinschränkungen
 - `IFS-4817`: Verwendung von `securityMatcher` in actuatorSecurityFilterChain und loadbalancerSecurityFilterChain für korrektes Filtern von Anfragen.
 - `IFS-4911`: Absicherung Actuator mit OAuth2
 - `IFS-5215`: Entkopplung des Bausteins isy-ueberwachung aus IsyFact Standards
+- `IFS-5434`: Die Aktuatoren /actuator/** werden mit OAuth2 abgesichert.
+  Die jwk-set-uri kann dafür in den application.properties als `isy.ueberwachung.security.jwk-set-uri` laut Dokumentation angegeben werden.
+  Wird dieses Property nicht gesetzt, ist ein Zugriff auf die Aktuatoren mit der vorhanden Security-Konfiguration der API-Endpunkte möglich.
+  Ist die Security-Konfiguration nicht vorhanden, ist ein Zugriff auf die Endpunkte nicht möglich.
 
 ## MIGRATION GUIDE
 
@@ -24,6 +29,9 @@ Anwendungen, die auf die zeitbeschränkten Metriken (`...LetzteMinute`) zur Übe
 Die übrigen Metriken ohne Zeitbeschränkung funktionieren weiterhin wie gehabt.
 
 > **Hinweis:** Mithilfe der z.B. in Prometheus verfügbaren Funktionen lässt sich die gewohnte Funktionalität nahezu vollständig nachbilden.
+
+- `IFS-5434`: Die jwk-set-uri für die Absicherung der Überwachungsendpunkte kann in den application.properties als `isy.ueberwachung.security.jwk-set-uri` laut Dokumentation angegeben werden.
+  Die alten Properties `isy.ueberwachung.security.username` und `isy.ueberwachung.security.password` können entfernt werden.
 
 ### Dependency Änderungen
 
