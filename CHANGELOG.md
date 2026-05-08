@@ -1,6 +1,7 @@
 # 5.0.0
 
 ### FEATURES
+- `IFS-5235`: Aktualisierung der Nutzungsvorgaben für Readiness/Liveness-Probes
 - `IFS-5234`: Hinzugefügt: Konzeptionelles Readiness- und Liveness-Modell für IF.5
 - `IFS-4818`: Autokonfiguration von Load Balancer separiert
 - `IFS-4748`: Dokumentation von aktualisierten Properties
@@ -46,10 +47,13 @@ Die übrigen Metriken ohne Zeitbeschränkung funktionieren weiterhin wie gehabt.
 ```
 ## RELEASE NOTES
 
-##### Modernisierung der Anwendungsüberwachung (Readiness & Liveness)
+##### Modernisierung der Anwendungsüberwachung: Readiness & Liveness
+
 Mit der Aktualisierung des IsyFact 5 (IF.5) Konzepts führen wir einen Cloud-nativen Monitoring-Standard ein, der die bisherige Vermischung von Betriebszuständen auflöst.
 Die Neuerungen im Überblick:
-* Präzise Traffic-Steuerung (Readiness): Loadbalancer erkennen über /actuator/health/readiness exakt, wann eine Instanz fachlich bereit ist (z. B. nach Cache-Initialisierung).
-* Erhöhte Robustheit (Liveness): Der neue /actuator/health/liveness Endpunkt liefert Infrastrukturen (wie Kubernetes) ein sauberes Signal für Prozess-Neustarts, ohne durch temporäre Nachbarsystem-Störungen Fehlalarme auszulösen.
-* Klare Abhängigkeiten: Neue Architekturvorgaben definieren präzise, welche Nachbarsysteme (Datenbanken, APIs) als essenziell für die Betriebsbereitschaft gelten.
-* Risikofreie Migration: Durch Parallelbetrieb bleibt der bestehende /actuator/health Endpunkt funktional identisch. Bestehende Monitorings laufen ohne Anpassungszwang weiter (kein Breaking Change).
+
+* **Readiness für Traffic-Steuerung:** Der Endpunkt `/actuator/health/readiness` zeigt an, ob eine Instanz Traffic annehmen soll. Die Readiness kombiniert den nativen Spring-Boot-Zustand `readinessState` mit dem IsyFact-Nachbarsystem-Indicator `isyNachbarsystem`.
+* **Liveness für Neustartentscheidungen:** Der Endpunkt `/actuator/health/liveness` liefert ein Signal, ob der Prozess grundsätzlich funktionsfähig ist. Temporäre Störungen externer Systeme sollen die Liveness nicht beeinflussen.
+* **Essenzielle Nachbarsysteme in Readiness:** Als essenziell konfigurierte Nachbarsysteme beeinflussen standardmäßig die Readiness. Nicht essenzielle Nachbarsysteme beeinflussen die Readiness nicht.
+* **Abwärtskompatibler Parallelbetrieb:** Der bestehende Endpunkt `/actuator/health` bleibt unverändert verfügbar. Bestehende Monitorings laufen ohne Anpassungszwang weiter.
+* **Hinweis für eigene Health-Groups:** Anwendungen, die `management.endpoint.health.group.readiness.include` selbst setzen, müssen die Defaults `readinessState,isyNachbarsystem` beibehalten und eigene Checks nur ergänzen.
