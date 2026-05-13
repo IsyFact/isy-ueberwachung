@@ -1,6 +1,7 @@
 # 5.0.0
 
 ### FEATURES
+- `IFS-5200`: Health Groups für Readiness(inklusive Nachbarsystem-Check) und Liveness Endpunkte hinzugefügt
 - `IFS-5235`: Aktualisierung der Nutzungsvorgaben für Readiness/Liveness-Probes
 - `IFS-5234`: Hinzugefügt: Konzeptionelles Readiness- und Liveness-Modell für IF.5
 - `IFS-4818`: Autokonfiguration von Load Balancer separiert
