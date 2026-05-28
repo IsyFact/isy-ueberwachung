@@ -44,6 +44,7 @@
         <maven.checkstyle.version>3.6.0</maven.checkstyle.version>
         <maven.jacoco.version>0.8.14</maven.jacoco.version>
         <maven.flatten.version>1.7.3</maven.flatten.version>
+        <maven.cyclondx.version>2.9.1</maven.cyclondx.version>
 
         <enforced.jdk.version>[25,26)</enforced.jdk.version>
         <enforced.maven.version>[3.6.3,4)</enforced.maven.version>
