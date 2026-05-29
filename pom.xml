@@ -51,7 +51,7 @@
         <spring-boot.version>4.0.6</spring-boot.version>
         <isy-datetime.version>5.0.0</isy-datetime.version>
         <isy-task.version>5.0.0-SNAPSHOT</isy-task.version>
-        <isy-logging.version>5.0.0</isy-logging.version>
+        <isy-logging.version>5.0.1</isy-logging.version>
         <isy-checkstyle-config.version>0.2.0</isy-checkstyle-config.version>
         <commons-cli.version>1.11.0</commons-cli.version>
 
