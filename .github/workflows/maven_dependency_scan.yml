@@ -1,0 +1,17 @@
+name: Maven Dependency Scan
+on:
+  push:
+    branches:
+      - develop
+      - support-*
+    paths:
+      - pom.xml
+
+jobs:
+  SnykScan:
+    uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_dependency_scan_template.yml@v2.3.0
+    with:
+      snyk-reference: ${{ github.ref_name }}
+      snyk-organization: ${{ vars.SNYK_ORG_ID }}
+    secrets:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

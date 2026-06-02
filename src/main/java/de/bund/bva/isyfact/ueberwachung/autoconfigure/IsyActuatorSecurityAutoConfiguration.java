@@ -1,0 +1,62 @@
+package de.bund.bva.isyfact.ueberwachung.autoconfigure;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.health.actuate.endpoint.HealthEndpoint;
+import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+
+/* tag::actuatorSecurity[] */
+
+/**
+ * Configures OAuth2 authentication for actuator endpoints.
+ * actuator/health needs no authentication
+ */
+@AutoConfiguration
+@EnableWebSecurity
+@ConditionalOnClass({SecurityFilterChain.class, HttpSecurity.class})
+public class IsyActuatorSecurityAutoConfiguration {
+
+    /**
+     * OpenID connect certificate‑endpoint to validate token against.
+     */
+    @Value("${isy.ueberwachung.security.jwk-set-uri:}")
+    private String jwkSetUri;
+
+    @Bean
+    @Order(10)
+    @ConditionalOnMissingBean(name = "actuatorSecurityFilterChain")
+    public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) {
+        http
+                .securityMatcher(EndpointRequest.toAnyEndpoint())
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers(EndpointRequest.to(HealthEndpoint.class)).permitAll()
+                        .anyRequest().authenticated())
+                .sessionManagement(sessionConfig ->
+                        sessionConfig
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        if (jwkSetUri != null && !jwkSetUri.isEmpty()) {
+            // secure actuator endpoints with JWT token, except health
+            http.oauth2ResourceServer(oauth -> oauth
+                    .jwt(jwt -> jwt
+                            .jwkSetUri(jwkSetUri)
+                    )
+            );
+        } else {
+            // use default token from security configuration
+            http.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+        }
+
+        return http.build();
+    }
+}
+/* end::actuatorSecurity[] */
