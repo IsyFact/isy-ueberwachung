@@ -43,7 +43,7 @@
         <maven.jar.version>3.5.0</maven.jar.version>
         <maven.source.plugin.version>3.4.0</maven.source.plugin.version>
         <maven.checkstyle.version>3.6.0</maven.checkstyle.version>
-        <maven.jacoco.version>0.8.14</maven.jacoco.version>
+        <maven.jacoco.version>0.8.15</maven.jacoco.version>
         <maven.flatten.version>1.7.3</maven.flatten.version>
         <maven.cyclondx.version>2.9.1</maven.cyclondx.version>
 
