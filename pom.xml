@@ -64,7 +64,7 @@
 
         <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
 
-        <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
+        <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
