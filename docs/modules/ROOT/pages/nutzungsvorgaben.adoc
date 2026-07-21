@@ -659,23 +659,49 @@ Die Konfiguration für die unterstützten Monitoring-Systeme ist in https://docs
 Für die Durchführung von Updates beim Deployment ist es notwendig, einzelne Knoten eines Anwendungsclusters aus dem Loadbalancing herauszunehmen, sodass dieser Knoten keine Anfragen mehr vom Loadbalancer zugeteilt bekommt.
 
 [[integration-des-loadbalancer-servlets]]
-==== Integration des Loadbalancer-Servlets
+=== Integration des Loadbalancer-Servlets
 
-Das Loadbalancing-Servlet ist als Teil der Bibliothek `isy-ueberwachung`.
-Es wird automatisch durch die Einbindung der Bibliothek als Servlet registriert.
-Standardmäßig verwendet das Servlet die Datei `/WEB-INF/classes/config/isAlive` als IsAlive-Datei.
+Das Loadbalancing-Servlet ist Teil der Bibliothek isy-ueberwachung. Es wird automatisch durch die Einbindung der Bibliothek als Servlet registriert.
+Die zu verwendende isAlive-Datei kann über die Property
+[source,properties]
+----
+isy.ueberwachung.loadbalancer.isAliveFileLocation
+----
+in der `application.properties` konfiguriert werden.
 
-NOTE: Nach dem Deployment entspricht dies der Datei `/etc/<anwendungsname>/isAlive`.
+==== Verhalten bei Embedded Tomcat
 
-Die zu suchende Datei kann bei Bedarf durch die Property `isy.ueberwachung.loadbalancer.isAliveFileLocation` in `application.properties` geändert werden.
+Wird die Anwendung mit einem Embedded Tomcat betrieben (z. B. als Spring-Boot-Anwendung), wird der konfigurierte Pfad als absoluter Dateisystempfad interpretiert.
 
-[[nutzung-des-loadbalancing-servlets]]
+Beispiel:
+[source,properties]
+----
+isy.ueberwachung.loadbalancer.isAliveFileLocation=/etc/<anwendungsname>/isAlive
+----
+In diesem Fall prüft das Loadbalancer-Servlet direkt die Existenz der Datei `/etc/<anwendung>/isAlive`. Der Standardpfad `DEFAULT_IS_ALIVE_FILE_LOCATION` wird für Embedded-Tomcat-Anwendungen nicht verwendet.
+
+==== Verhalten bei externem Servlet-Container
+
+Wird die Anwendung in einem externen Servlet-Container (Tomcat, nicht embedded) betrieben, wird der konfigurierte Pfad relativ zum Servlet-Kontext aufgelöst.
+
+Beispiel:
+[source,properties]
+----
+isy.ueberwachung.loadbalancer.isAliveFileLocation=config/isAlive
+----
+Der Pfad wird in diesem Fall über den Servlet-Kontext ermittelt und relativ zur Anwendung interpretiert.
+
 ==== Nutzung des Loadbalancing-Servlets
 
-Durch die oben beschriebene Konfiguration kann die gewünschte Verfügbarkeit der Anwendung über die URL `http(s)://<serverurl>/<anwendungsname>/Loadbalancer abgefragt werden`.
+Die Verfügbarkeit der Anwendung kann über die URL
+[text]
+----
+http(s)://<serverurl>/<anwendungsname>/Loadbalancer
+----
+abgefragt werden.
 
-Zur Steuerung des Loadbalancing-Servlets muss die IsAlive-Datei im Konfigurationsverzeichnis der Anwendung durch den Betrieb angelegt bzw. entfernt werden.
-Der Standardname für die IsAlive-Datei ist `/etc/<anwendungsname>/isAlive`.
-Dieses kann der Betrieb bei Bedarf über ein Shell-Skript automatisieren.
+Für eine positive Statusmeldung muss die konfigurierte IsAlive-Datei vorhanden sein. Zur Steuerung des Loadbalancer-Servlets kann der Betrieb diese Datei anlegen oder entfernen. Das Anlegen bzw. Entfernen kann bei Bedarf über Shell-Skripte oder entsprechende Betriebswerkzeuge automatisiert werden.
+
+
 
 // end::inhalt[]
