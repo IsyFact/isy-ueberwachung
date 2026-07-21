@@ -14,35 +14,37 @@ import de.bund.bva.isyfact.logging.LogKategorie;
 import de.bund.bva.isyfact.ueberwachung.common.konstanten.EreignisSchluessel;
 
 /**
- * Servlet zur Steuerung des Loadbalancings einer Webanwendungen. Der Loadbalancer kann die URL des Servlets
- * regelmäßig abfragen. Das Servlet liefert HTTP OK, falls die IsAlive-Datei gefunden wurde. Falls nicht wird
- * HTTP FORBIDDEN an den aufrufenden Loadbalancer gemeldet. Der Loadbalancer verteilt dann keine Anfragen an
- * die Webanwendung mehr. Der Pfad zur Loadbalancer-Datei kann bei Bedarf &uuml;ber den Init-Parameter
- * {@link #PARAM_IS_ALIVE_FILE_LOCATION} angegeben werden. Ist der Parameter nicht gesetzt, wird der
- * Default-Wert {@link #DEFAULT_IS_ALIVE_FILE_LOCATION} verwendet.
- *
+ * Servlet for controlling the load balancing of a web application. The load balancer
+ * can periodically invoke the servlet's URL. The servlet returns HTTP OK if the
+ * IsAlive file is found. Otherwise, HTTP FORBIDDEN is reported to the calling
+ * load balancer. In that case, the load balancer will no longer route requests
+ * to the web application.
+ * If required, the path to the IsAlive file can be specified using the init
+ * parameter {@link #PARAM_IS_ALIVE_FILE_LOCATION}. If the parameter is not set,
+ * the default value {@link #DEFAULT_IS_ALIVE_FILE_LOCATION} is used.
  */
 public class LoadbalancerServlet extends HttpServlet {
-    /** UID der Klasse. */
+
+    /** UID of the class. */
     @Serial
     private static final long serialVersionUID = 7248576003928677600L;
 
-    /** Logger der Klasse. */
+    /** Logger of the class. */
     private static final IsyLogger LOG = IsyLoggerFactory.getLogger(LoadbalancerServlet.class);
 
-    /** Parametername fuer den Pfad zur IsAlive-Datei. */
+    /** Parameter name for the path to the IsAlive file. */
     private static final String PARAM_IS_ALIVE_FILE_LOCATION = "isAliveFileLocation";
 
-    /** Standard Ablageort der IsAlive-Datei. */
+    /** Default location of the IsAlive file. */
     private static final String DEFAULT_IS_ALIVE_FILE_LOCATION = "/WEB-INF/classes/config/isAlive";
 
     /**
-     * File-Referenz für IsAlive-Datei.
+     * Reference for the IsAlive file.
      */
     private static File isAliveFile;
 
     /**
-     * Initialisiert das Servlet.
+     * Initializing the Servlet.
      */
     @Override
     public void init() {
@@ -55,25 +57,25 @@ public class LoadbalancerServlet extends HttpServlet {
                 DEFAULT_IS_ALIVE_FILE_LOCATION);
             isAliveFileLocation = DEFAULT_IS_ALIVE_FILE_LOCATION;
         }
-        String realIsAliveFilePath = getServletContext().getRealPath(isAliveFileLocation);
-        isAliveFile = new File(realIsAliveFilePath);
+        String realPath = getServletContext().getRealPath(isAliveFileLocation);
+        isAliveFile = realPath != null
+                ? new File(realPath)
+                : new File(isAliveFileLocation);
 
         LOG.info(LogKategorie.JOURNAL, EreignisSchluessel.PLUEB00001, "IsAlive-Datei {} konfiguriert.",
             isAliveFile.getAbsolutePath());
     }
 
-    /** GET-Request bearbeiten. Prüft, ob die IsAlive-Datei vorhanden ist und liefert dann HTTP OK zurück.
-     * Andernfalls wird HTTP FORBIDDEN zurückgeliefert.
+    /**
+     * Handles a GET request. Checks whether the IsAlive file exists and, if so,
+     * returns HTTP OK.
+     * Otherwise, HTTP FORBIDDEN is returned.
      *
      * @param req
-     *            Der HttpServletRequest an das Loadbalancer-Servlet.
+     *            The HttpServletRequest sent to the load balancer servlet.
      * @param resp
-     *            Die Antwort des Loadbalancer-Servlets.
-     *
-     * @throws IOException
-     *             Wenn die Antwort nicht geschrieben werden kann.
+     *            The response of the load balancer servlet.
      */
-    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         if (isAliveFile.exists()) {
             LOG.debug("IsAlive-Datei gefunden, sende HTTP OK.");
