@@ -1,6 +1,7 @@
 # 5.1.0
 
 ### FEATURES
+`IFS-5691`: isy-ueberwachung LoadBalancer - Auslesen der isAlive-Datei aus Dateisystem und Servlet Context
 
 ### BREAKING CHANGES
 

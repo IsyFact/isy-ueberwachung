@@ -1,7 +1,6 @@
 package de.bund.bva.isyfact.ueberwachung.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -9,6 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -28,17 +28,17 @@ public class LoadbalancerSecurityConfiguration {
      * @param http {@link HttpSecurity}
      *
      * @return {@link SecurityFilterChain}
-     * @throws Exception if an error occurred when building the Object
      */
     @Bean
     @Order(20)
     SecurityFilterChain loadbalancerSecurityFilterChain(HttpSecurity http) {
         http
-                .securityMatcher(EndpointRequest.toAnyEndpoint())
+                .securityMatcher(PathPatternRequestMatcher.withDefaults().matcher(LOADBALANCER_SERVLET_PATH))
                 .authorizeHttpRequests(requests -> requests
                                 .requestMatchers(LOADBALANCER_SERVLET_PATH).permitAll())
                 .sessionManagement(sessionConfig ->
                         sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
+    
 }
