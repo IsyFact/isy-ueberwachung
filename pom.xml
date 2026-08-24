@@ -50,7 +50,7 @@
         <enforced.jdk.version>[25,26)</enforced.jdk.version>
         <enforced.maven.version>[3.6.3,4)</enforced.maven.version>
 
-        <spring-boot.version>4.1.0</spring-boot.version>
+        <spring-boot.version>4.1.1</spring-boot.version>
         <isy-datetime.version>5.0.0</isy-datetime.version>
         <isy-task.version>5.0.0</isy-task.version>
         <isy-logging.version>5.0.2</isy-logging.version>
