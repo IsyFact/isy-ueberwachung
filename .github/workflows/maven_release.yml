@@ -32,6 +32,8 @@ jobs:
 
   DependencyMonitor:
     needs: [ DeployReleaseVersion ]
+    permissions:
+      contents: read
     uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_dependency_scan_template.yml@v3.0.0
     with:
       snyk-reference: ${{ github.ref_name }}
