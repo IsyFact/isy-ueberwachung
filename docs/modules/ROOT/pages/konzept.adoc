@@ -186,6 +186,11 @@ Die Nachbarsystemchecks können individuell konfiguriert werden.
 So kann z. B. konfiguriert werden, ob ein Nachbarsystem essenziell ist oder nicht.
 Details hierzu finden sich in den xref:nutzungsvorgaben.adoc#vorgaben-fuer-die-pruefung-der-verfuegbarkeit[Nutzungsvorgaben].
 
+[IMPORTANT]
+Hinweis: Nachbarsystemchecks sollen ab der IF6 nicht mehr verwendet werden.
+Für Neuentwicklungen wird bereits jetzt davon abgeraten, Nachbarsystemchecks neu zu implementieren.
+Bestehende Implementierungen können bis zur Ablösung weiter betrieben werden.
+
 [[nachbarsystemcheck-allgemein]]
 ==== Nachbarsystemchecks (allgemein)
 

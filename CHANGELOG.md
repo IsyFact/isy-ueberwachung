@@ -2,6 +2,7 @@
 
 ### FEATURES
 `IFS-5691`: isy-ueberwachung LoadBalancer - Auslesen der isAlive-Datei aus Dateisystem und Servlet Context
+`IFS-5758`: Deprecation-Hinweis für Nachbarsystemchecks eingefügt
 
 ### BREAKING CHANGES
 
