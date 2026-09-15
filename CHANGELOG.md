@@ -1,8 +1,9 @@
 # 5.1.0
 
 ### FEATURES
-`IFS-5691`: isy-ueberwachung LoadBalancer - Auslesen der isAlive-Datei aus Dateisystem und Servlet Context
-`IFS-5758`: Deprecation-Hinweis für Nachbarsystemchecks eingefügt
+- `IFS-5691`: isy-ueberwachung LoadBalancer - Auslesen der isAlive-Datei aus Dateisystem und Servlet Context
+- `IFS-5758`: Deprecation-Hinweis für Nachbarsystemchecks eingefügt
+- `IFS-5784`: isAlive-File des LoadBalancers in embedded Tomcat integrieren
 
 ### BREAKING CHANGES
 
