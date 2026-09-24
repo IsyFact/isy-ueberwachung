@@ -16,6 +16,9 @@ jobs:
 
   DeployReleaseVersion:
     needs: [ Build ]
+    permissions:
+      contents: write
+      packages: write
     uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_deploy_template.yml@v3.0.0
     with:
       version: ${{ github.ref_name }}
