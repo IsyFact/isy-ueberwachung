@@ -2,11 +2,18 @@
 name: Maven Build
 
 on:
+  pull_request:
+    branches:
+      - develop
+      - main
+      - develop-**
+      - support/**
   push:
     branches:
       - main
       - develop
-      - support-*
+      - support/**
+      - develop-**
       - hotfix/**
       - feature/**
       - bugfix/**
