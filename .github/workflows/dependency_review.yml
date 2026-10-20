@@ -10,6 +10,3 @@ jobs:
     permissions:
       contents: read
     uses: IsyFact/isy-github-actions-templates/.github/workflows/dependency_review_template.yml@v3.0.0
-    with:
-      allow-dependencies-licenses:
-        'pkg:maven/org.jacoco/jacoco-maven-plugin'
