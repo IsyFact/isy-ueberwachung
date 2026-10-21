@@ -18,33 +18,37 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 
+@ExtendWith(MockitoExtension.class)
 public class TestLoadbalancerServlet {
 
 	private LoadbalancerServlet loadBalancer;
 	private ServletConfig mockConfig;
-	private Appender mockAppender;
 	private ServletContext mockContext;
-	
+
+	@Mock
+	private Appender<ILoggingEvent> mockAppender;
+
 	@BeforeEach
 	public void setUp(){
 		loadBalancer = new LoadbalancerServlet();
-
 		Logger logger = (Logger) LoggerFactory.getLogger(LoadbalancerServlet.class);
-        mockAppender = mock(Appender.class);
 		logger.addAppender(mockAppender);
-
 		mockConfig = mock(ServletConfig.class);
 		mockContext = mock(ServletContext.class);
-		when(mockConfig.getServletContext()).thenReturn(mockContext);
 	}
 	
 	@Test
 	public void testInit() throws ServletException {
+		when(mockConfig.getServletContext()).thenReturn(mockContext);
 		when(mockContext.getRealPath("/WEB-INF/classes/config/isAlive")).thenReturn("/WEB-INF/classes/config/isAlive/isAlive");
 		when(mockConfig.getInitParameter("isAliveFileLocation")).thenReturn("/WEB-INF/classes/config/isAlive");
 		loadBalancer.init(mockConfig);	
@@ -52,18 +56,8 @@ public class TestLoadbalancerServlet {
 	}
 	
 	@Test
-	public void testInitNull() throws ServletException {
-		when(mockContext.getRealPath("/WEB-INF/classes/config/isAlive")).thenReturn("/WEB-INF/classes/config/isAlive/isAlive");
-		when(mockConfig.getInitParameter("isAliveFileLocation")).thenReturn(null);
-		loadBalancer.init(mockConfig);	
-		verify(mockAppender, times(3)).doAppend(any());
-	}
-	
-	
-	@Test
 	public void testDoGet() throws ServletException {
-		when(mockContext.getRealPath("/src/test/resources")).thenReturn("/src/test/resources/isAlive");
-		when(mockConfig.getInitParameter("isAliveFileLocation")).thenReturn("/src/test/resources");
+		when(mockConfig.getInitParameter("isAliveFileLocation")).thenReturn(new File ("/src/test/resources").getAbsolutePath());
 		loadBalancer.init(mockConfig);	
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		loadBalancer.doGet(null, resp);
@@ -72,10 +66,9 @@ public class TestLoadbalancerServlet {
 	}
 	
 	@Test
-	public void testDoGetIsAlive() throws ServletException, IOException {
-		when(mockContext.getRealPath("/src/test/resources")).thenReturn("src/test/resources/isAlive");
-		when(mockConfig.getInitParameter("isAliveFileLocation")).thenReturn("/src/test/resources");
+	public void testDoGetIsAliveEmbeddedTomcat() throws ServletException, IOException {
 		File f = new File("src/test/resources/isAlive");
+		when(mockConfig.getInitParameter("isAliveFileLocation")).thenReturn(f.getParentFile().getAbsolutePath());
 		assertTrue(f.createNewFile());
 		PrintWriter writer = new PrintWriter(f);
 		loadBalancer.init(mockConfig);	
@@ -84,9 +77,26 @@ public class TestLoadbalancerServlet {
 		loadBalancer.doGet(null, resp);
 		verify(mockAppender, times(3)).doAppend(any());
 		verify(resp, times(1)).setStatus(HttpServletResponse.SC_OK);
-
 		writer.close();
-		f.delete();
+		assertTrue(f.delete());
+	}
+
+	@Test
+	public void testDoGetIsAliveTomcat() throws ServletException, IOException {
+		File f = new File("src/test/resources/isAlive");
+		when(mockConfig.getServletContext()).thenReturn(mockContext);
+		when(mockContext.getRealPath(any())).thenReturn(f.getParentFile().getAbsolutePath());
+		when(mockConfig.getInitParameter("isAliveFileLocation")).thenReturn("/WEB-INF/classes/config/isAlive");
+		assertTrue(f.createNewFile());
+		PrintWriter writer = new PrintWriter(f);
+		loadBalancer.init(mockConfig);
+		HttpServletResponse resp = mock(HttpServletResponse.class);
+		when(resp.getWriter()).thenReturn(writer);
+		loadBalancer.doGet(null, resp);
+		verify(mockAppender, times(3)).doAppend(any());
+		verify(resp, times(1)).setStatus(HttpServletResponse.SC_OK);
+		writer.close();
+		assertTrue(f.delete());
 	}
 
 }

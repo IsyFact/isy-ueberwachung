@@ -38,33 +38,33 @@
         <maven.compiler.release>25</maven.compiler.release>
         <maven.compiler.version>3.15.0</maven.compiler.version>
         <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
-        <maven.surefire.version>3.5.5</maven.surefire.version>
+        <maven.surefire.version>3.5.6</maven.surefire.version>
         <maven.javadoc.plugin.version>3.12.0</maven.javadoc.plugin.version>
-        <maven.jar.version>3.5.0</maven.jar.version>
+        <maven.jar.version>3.5.1</maven.jar.version>
         <maven.source.plugin.version>3.4.0</maven.source.plugin.version>
         <maven.checkstyle.version>3.6.0</maven.checkstyle.version>
-        <maven.jacoco.version>0.8.14</maven.jacoco.version>
-        <maven.flatten.version>1.7.3</maven.flatten.version>
-        <maven.cyclondx.version>2.9.1</maven.cyclondx.version>
+        <maven.jacoco.version>0.8.15</maven.jacoco.version>
+        <maven.flatten.version>1.8.0</maven.flatten.version>
+        <maven.cyclondx.version>2.9.3</maven.cyclondx.version>
 
         <enforced.jdk.version>[25,26)</enforced.jdk.version>
         <enforced.maven.version>[3.6.3,4)</enforced.maven.version>
 
-        <spring-boot.version>4.0.6</spring-boot.version>
-        <isy-datetime.version>5.0.0</isy-datetime.version>
-        <isy-task.version>5.0.0</isy-task.version>
-        <isy-logging.version>5.0.1</isy-logging.version>
+        <spring-boot.version>4.1.1</spring-boot.version>
+        <isy-datetime.version>5.1.0</isy-datetime.version>
+        <isy-task.version>5.1.0</isy-task.version>
+        <isy-logging.version>5.1.0</isy-logging.version>
         <isy-checkstyle-config.version>0.2.0</isy-checkstyle-config.version>
         <commons-cli.version>1.11.0</commons-cli.version>
 
-        <tidy-maven-plugin.version>1.4.0</tidy-maven-plugin.version>
-        <spotbugs.version>4.9.8.3</spotbugs.version>
+        <tidy-maven-plugin.version>1.4.1</tidy-maven-plugin.version>
+        <spotbugs.version>4.10.4.1</spotbugs.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
 
-        <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
+        <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
     </properties>
 
     <dependencyManagement>

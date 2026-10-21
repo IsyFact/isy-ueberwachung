@@ -2,11 +2,18 @@
 name: Maven Build
 
 on:
+  pull_request:
+    branches:
+      - develop
+      - main
+      - develop-**
+      - support/**
   push:
     branches:
       - main
       - develop
-      - support-*
+      - support/**
+      - develop-**
       - hotfix/**
       - feature/**
       - bugfix/**
@@ -18,14 +25,18 @@ on:
 
 jobs:
   Version:
-    uses: IsyFact/isy-github-actions-templates/.github/workflows/next_version.yml@v2.3.0
+    permissions:
+      contents: read
+    uses: IsyFact/isy-github-actions-templates/.github/workflows/next_version.yml@v3.0.0
     with:
-      next-version: 5.0.0
+      next-version: 5.1.0
       calculate-rc: ${{ startsWith(github.ref, 'refs/heads/support-') }}
 
   Maven:
     needs: [ Version ]
-    uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_build_template.yml@v2.3.0
+    permissions:
+      contents: read
+    uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_build_template.yml@v3.1.0
     with:
       version: ${{ needs.Version.outputs.next-version }}
     secrets:
@@ -35,7 +46,10 @@ jobs:
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
       (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/support-'))
     needs: [ Version, Maven ]
-    uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_deploy_template.yml@v2.3.0
+    permissions:
+      contents: write
+      packages: write
+    uses: IsyFact/isy-github-actions-templates/.github/workflows/maven_deploy_template.yml@v3.0.0
     with:
       version: ${{ needs.Version.outputs.next-version }}
       maven-opts: '-PcentralSnapshot'
