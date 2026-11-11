@@ -289,8 +289,8 @@ NOTE: Weiterführende Informationen enthält die https://docs.spring.io/spring-b
 [[konfiguration-und-absicherung-von-endpoints]]
 ==== Konfiguration und Absicherung von Endpoints
 
-Gemäß den Vorgaben werden nicht benötigte Endpoints deaktiviert, und jeder veröffentlichte Endpoint wird durch
-Authentifizierung abgesichert.
+Gemäß den Vorgaben werden nicht benötigte Endpoints deaktiviert, und veröffentlichte Endpoint müssen durch Authentifizierung abgesichert.
+Der Endpunkt `health` mit den Gruppen `livness`/ `readiness` ist von dieser Vorgabe ausgeschlossen.
 
 [[konfiguration-von-endpoints]]
 ===== Konfiguration von Endpoints
